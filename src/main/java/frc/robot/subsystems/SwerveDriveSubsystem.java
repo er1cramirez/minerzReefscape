@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,8 +19,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private SwerveModule backRightModule;
 
     // Kinematics
-    private final double chassisWidth = Units.inchesToMeters(24);
-    private final double chassisLength = Units.inchesToMeters(24);
+    private final double chassisWidth = Units.inchesToMeters(20);
+    private final double chassisLength = Units.inchesToMeters(20);
     // The locations for the modules must be relative to the center of the robot. Positive x values represent moving toward the front of the robot whereas positive y values represent moving toward the left of the robot.
     private final Translation2d frontLeftLocation = new Translation2d(chassisWidth / 2, chassisLength / 2);
     private final Translation2d frontRightLocation = new Translation2d(chassisWidth / 2, -chassisLength / 2);
@@ -37,10 +38,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     SwerveModuleState[] targetStates;
 
     public SwerveDriveSubsystem(CommandXboxController driverController) {
-        frontLeftModule = new SwerveModule(1, 2, 3);
-        frontRightModule = new SwerveModule(4, 5, 6);
-        backLeftModule = new SwerveModule(7, 8, 9);
-        backRightModule = new SwerveModule(10, 11, 12);
+        frontLeftModule = new SwerveModule(1, 2, 16, new Rotation2d());
+        frontRightModule = new SwerveModule(5, 6, 19, new Rotation2d(Math.PI));
+        backLeftModule = new SwerveModule(3, 4, 17, new Rotation2d());
+        backRightModule = new SwerveModule(7, 8, 18, new Rotation2d(Math.PI));
 
         this.driverController = driverController;
 
