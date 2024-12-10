@@ -90,7 +90,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     public ChassisSpeeds getSpeedsFromController() {
         double forward = -driverController.getLeftY();
-        double strafe = driverController.getLeftX();
+        double strafe = -driverController.getLeftX();
         double rotation = driverController.getRightX();
 
         return new ChassisSpeeds(forward, strafe, rotation);
