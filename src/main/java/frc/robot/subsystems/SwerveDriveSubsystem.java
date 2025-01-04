@@ -1,34 +1,24 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.constants.Constants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
     // Modules
-    private SwerveModule frontLeftModule;
-    private SwerveModule frontRightModule;
-    private SwerveModule backLeftModule;
-    private SwerveModule backRightModule;
+    private Mk4iSwerveModule frontLeftModule;
+    private Mk4iSwerveModule frontRightModule;
+    private Mk4iSwerveModule backLeftModule;
+    private Mk4iSwerveModule backRightModule;
 
     // Kinematics
-    private final double chassisWidth = Units.inchesToMeters(20);
-    private final double chassisLength = Units.inchesToMeters(20);
-    // The locations for the modules must be relative to the center of the robot. Positive x values represent moving toward the front of the robot whereas positive y values represent moving toward the left of the robot.
-    private final Translation2d frontLeftLocation = new Translation2d(chassisWidth / 2, chassisLength / 2);
-    private final Translation2d frontRightLocation = new Translation2d(chassisWidth / 2, -chassisLength / 2);
-    private final Translation2d backLeftLocation = new Translation2d(-chassisWidth / 2, chassisLength / 2);
-    private final Translation2d backRightLocation = new Translation2d(-chassisWidth / 2, -chassisLength / 2);
+    private final SwerveDriveKinematics swerveDriveKinematics = Constants.SwerveDriveConstants.kinematics;
 
-    private final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation);
-    
     CommandXboxController driverController;
 
     // For debugging purposes
@@ -38,10 +28,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     SwerveModuleState[] targetStates;
 
     public SwerveDriveSubsystem(CommandXboxController driverController) {
-        frontLeftModule = new SwerveModule(1, 2, 16, new Rotation2d());
-        frontRightModule = new SwerveModule(5, 6, 19, new Rotation2d(Math.PI));
-        backLeftModule = new SwerveModule(3, 4, 17, new Rotation2d());
-        backRightModule = new SwerveModule(7, 8, 18, new Rotation2d(Math.PI));
+        frontLeftModule = new Mk4iSwerveModule(Constants.SwerveDriveConstants.frontLeftModuleConstants);
+        frontRightModule = new Mk4iSwerveModule(Constants.SwerveDriveConstants.frontRightModuleConstants);
+        backLeftModule = new Mk4iSwerveModule(Constants.SwerveDriveConstants.backLeftModuleConstants);
+        backRightModule = new Mk4iSwerveModule(Constants.SwerveDriveConstants.backRightModuleConstants);
 
         this.driverController = driverController;
 
@@ -85,7 +75,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public SwerveModuleState[] getStatesFromSpeeds(ChassisSpeeds speeds) {
-        return swerveKinematics.toSwerveModuleStates(speeds);
+        return swerveDriveKinematics.toSwerveModuleStates(speeds);
     }
 
     public ChassisSpeeds getSpeedsFromController() {

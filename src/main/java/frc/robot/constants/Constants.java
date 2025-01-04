@@ -4,64 +4,92 @@
 
 package frc.robot.constants;
 
+import com.revrobotics.CANSparkBase.IdleMode;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
-/**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
- *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
- * constants are needed, to reduce verbosity.
- */
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+  public static class ControllersConstants {
+    public static final int chassisControllerPort = 0;
+    public static final int operatorControllerPort = 1;
+    public static final double chassisControllerDeadband = 0.05;
+    public static final double operatorControllerDeadband = 0.05;
   }
 
   public static class SwerveDriveConstants {
-    public static final double kChassisWidth = Units.feetToMeters(20);//inch
-    public static final double kChassisLength = Units.feetToMeters(20);//inch
+    // Chassis dimensions
+    public static final double chassisWidth = Units.inchesToMeters(20);//inch
+    public static final double chassisLength = Units.inchesToMeters(20);//inch
+    // Kinematics
     public static final double kMaxSpeed = 3.0;//m/s
     public static final double kMaxAngularSpeed = Math.PI;//rad/s
-
-    public static final double kFrontLeftLocationX = kChassisWidth / 2;
-    public static final double kFrontLeftLocationY = kChassisLength / 2;
-    public static final double kFrontRightLocationX = kChassisWidth / 2;
-    public static final double kFrontRightLocationY = -kChassisLength / 2;
-    public static final double kBackLeftLocationX = -kChassisWidth / 2;
-    public static final double kBackLeftLocationY = kChassisLength / 2;
-    public static final double kBackRightLocationX = -kChassisWidth / 2;
-    public static final double kBackRightLocationY = -kChassisLength / 2;
-
-    public static final double kP = 0.04;
-    public static final double kI = 0;
-    public static final double kD = 0;
-
-    //values to calculate the drive feedforward (KFF)
-    public static final double driveKS = 0.667; //to calculate
-    public static final double driveKV = 2.44; //to calculate
-    public static final double driveKA = 0.27; //to calculate
+    // Module positions
+    public static final Translation2d frontLeftModulePosition = new Translation2d(chassisWidth / 2, chassisLength / 2);
+    public static final Translation2d frontRightModulePosition = new Translation2d(chassisWidth / 2, -chassisLength / 2);
+    public static final Translation2d backLeftModulePosition = new Translation2d(-chassisWidth / 2, chassisLength / 2);
+    public static final Translation2d backRightModulePosition = new Translation2d(-chassisWidth / 2, -chassisLength / 2);
+    // Kinematics object
+    public static final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+        frontLeftModulePosition, frontRightModulePosition, backLeftModulePosition, backRightModulePosition);
+        
+    // Module steer offsets
+    public static final Rotation2d frontLeftSteerOffset = new Rotation2d();
+    public static final Rotation2d frontRightSteerOffset = new Rotation2d(Math.PI);
+    public static final Rotation2d backLeftSteerOffset = new Rotation2d();
+    public static final Rotation2d backRightSteerOffset = new Rotation2d(Math.PI);
     
-    public static final double kDriveWheelDiameter = Units.inchesToMeters(4);//inch
-    public static final double driveGearRatio = (6.75 / 1.0); 
-    public static final double angleGearRatio = ((150/7) / 1.0);
-  }
-   public static final class ModuleConstants {
-    public static final double kDriveWheelDiameter = Units.inchesToMeters(4);//inch
-    public static final double driveGearRatio = (6.75 / 1.0); 
-    public static final double angleGearRatio = ((150/7) / 1.0);
-    // Calculations required for driving motor conversion factors and feed forward
-    public static final double kDrivingMotorFreeSpeedRps = NeoMotorConstants.kFreeSpeedRpm / 60;
-    public static final double kWheelCircumferenceMeters = kDriveWheelDiameter * Math.PI;
-    public static final double kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters)
-        / driveGearRatio;
-  }
+    // NavX
+    public static final boolean kGyroReversed = false;
 
-  public static final class OIConstants {
-    public static final int kDriverControllerPort = 0;
-    public static final double kDriveDeadband = 0.05;
+    public static final class Mk4iMechanicalConstants {
+      // L2 ratios for the module Mk4i from Swerve Drive Specialties
+      public static final double driveGearRatio = (6.75 / 1.0); 
+      public static final double angleGearRatio = ((150/7) / 1.0);
+      // Wheel diameter
+      public static final double wheelDiameter = Units.inchesToMeters(4);//4 inch
+      // Calculations required for driving motor conversion factors and feed forward
+      public static final double drivingMotorFreeSpeedRps = MotorConstants.freeSpeedRpm / 60;
+      public static final double wheelCircumferenceMeters = wheelDiameter * Math.PI;
+      public static final double driveWheelFreeSpeedRps = (drivingMotorFreeSpeedRps * wheelCircumferenceMeters)
+          / driveGearRatio;
+      // Conversion factors
+      public static final double drivingFactor = wheelDiameter * Math.PI / driveGearRatio;
+      public static final double drivingVelocityFeedForward  = 1 / driveWheelFreeSpeedRps;
+      public static final double steeringFactor = (2.0 * Math.PI) / angleGearRatio;
+      public static final double steeringVelocityFeedForward = 1 / driveWheelFreeSpeedRps;
+    }
+
+    // Other types of modules can be added here
+
+
+    // PID constants
+    public static final PIDConstants drivePIDConstants = new PIDConstants(
+      0.4, 0, 0.01, 0, 0, 1, -1);
+    public static final PIDConstants steerPIDConstants = new PIDConstants(
+      1, 0, 0.4, 0, 0, 1, -1);
+    // Module constants
+    public static final Mk4iSwerveModuleConstants frontLeftModuleConstants = new Mk4iSwerveModuleConstants(
+      1, 2, 16, frontLeftSteerOffset, 
+      false, false, false, 
+      drivePIDConstants, steerPIDConstants);
+    public static final Mk4iSwerveModuleConstants frontRightModuleConstants = new Mk4iSwerveModuleConstants(
+      5, 6, 19, frontRightSteerOffset, 
+      false, false, false, 
+      drivePIDConstants, steerPIDConstants);
+    public static final Mk4iSwerveModuleConstants backLeftModuleConstants = new Mk4iSwerveModuleConstants(
+      3, 4, 17, backLeftSteerOffset, 
+      false, false, false, 
+      drivePIDConstants, steerPIDConstants);
+    public static final Mk4iSwerveModuleConstants backRightModuleConstants = new Mk4iSwerveModuleConstants(
+      7, 8, 18, backRightSteerOffset, 
+      false, false, false, 
+      drivePIDConstants, steerPIDConstants);
+
+    
   }
 
   public static final class AutoConstants {
@@ -78,7 +106,15 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
-  public static final class NeoMotorConstants {
-    public static final double kFreeSpeedRpm = 5676;
+  public static final class MotorConstants {
+    public static final double freeSpeedRpm = 5676;
+    public static final double voltageCompensation = 12.0;
+    // Current limits (Actually for NEO Motors)
+    public static final int driveCurrentLimit = 40;
+    public static final int steerCurrentLimit = 20;
+    // Neutral Modes
+    public static final IdleMode driveIdleMode = IdleMode.kBrake;
+    public static final IdleMode steerIdleMode = IdleMode.kBrake;
   }
+
 }

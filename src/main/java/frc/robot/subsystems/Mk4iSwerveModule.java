@@ -14,14 +14,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.constants.Constants;
+import frc.robot.constants.Mk4iSwerveModuleConstants;
+import frc.robot.constants.PIDConstants;
 
 
 
-public class SwerveModule {
+public class Mk4iSwerveModule {
     // Hardware
+    // * Motors
     private final CANSparkMax drivingMotor;
     private final CANSparkMax steeringMotor;
-    // Encoders
+    // * Encoders
     private final RelativeEncoder drivingEncoder;
     private final RelativeEncoder steeringEncoder;
     private final CANcoder steerAbsoluteEncoder;
@@ -35,24 +38,26 @@ public class SwerveModule {
     // Constants
     // private SwerveModuleState currentState;
     private SwerveModuleState targetState;
-    private final Rotation2d chassisAngularOffset;
     private int resetIteration = 0;
+    private final Rotation2d chassisAngularOffset;
+    private final PIDConstants drivingPIDConstants;
+    private final PIDConstants steeringPIDConstants;
 
     // Constructor
-    public SwerveModule(int drivingMotorID, int steeringMotorID, int steerEncoderID, Rotation2d chassisAngularOffset) {
-        drivingMotor = new CANSparkMax(drivingMotorID, MotorType.kBrushless);
-        steeringMotor = new CANSparkMax(steeringMotorID, MotorType.kBrushless);
-        
+    public Mk4iSwerveModule(Mk4iSwerveModuleConstants moduleConstants) {
+        drivingMotor = new CANSparkMax(moduleConstants.drivingMotorID(), MotorType.kBrushless);
+        steeringMotor = new CANSparkMax(moduleConstants.drivingMotorID(), MotorType.kBrushless);
         drivingEncoder = drivingMotor.getEncoder();
         steeringEncoder = steeringMotor.getEncoder();
-        steerAbsoluteEncoder = new CANcoder(steerEncoderID);
+        steerAbsoluteEncoder = new CANcoder(moduleConstants.steerAbsoluteEncoderID());
+        chassisAngularOffset = moduleConstants.steerAngleOffset();
         // com.ctre.phoenix6.hardware.ParentDevice.optimizeBusUtilizationForAll(20, steerAbsoluteEncoder);
-
         drivingController = drivingMotor.getPIDController();
         // drivingFeedforward = new SimpleMotorFeedforward(Constants.SwerveDriveConstants.driveKS, Constants.SwerveDriveConstants.driveKV, Constants.SwerveDriveConstants.driveKA);
         steeringController = steeringMotor.getPIDController();
         // steeringFeedforward = new SimpleMotorFeedforward(Constants.SwerveDriveConstants.driveKS, Constants.SwerveDriveConstants.driveKV, Constants.SwerveDriveConstants.driveKA);
-        this.chassisAngularOffset = chassisAngularOffset;
+        drivingPIDConstants = moduleConstants.drivingPIDConstants();
+        steeringPIDConstants = moduleConstants.steeringPIDConstants();
         initializeModule();
     }
     // Methods
@@ -78,18 +83,18 @@ public class SwerveModule {
         drivingMotor.setIdleMode(IdleMode.kBrake);
         drivingMotor.setSmartCurrentLimit(50);
         // Encoder
-        double drivingFactor = Constants.SwerveDriveConstants.kDriveWheelDiameter * Math.PI / Constants.SwerveDriveConstants.driveGearRatio;
-        double drivingVelocityFeedForward  = 1 / Constants.ModuleConstants.kDriveWheelFreeSpeedRps;
-        drivingEncoder.setPositionConversionFactor(/* Conversion Factor = drivingFactor*/drivingFactor);
-        drivingEncoder.setVelocityConversionFactor(/* Conversion Factor = drivingFactor / 60.0*/drivingFactor/60.0);
+        
+        drivingEncoder.setPositionConversionFactor(
+            /* Conversion Factor = drivingFactor*/Constants.SwerveDriveConstants.Mk4iMechanicalConstants.drivingFactor);
+        drivingEncoder.setVelocityConversionFactor(
+            /* Conversion Factor = drivingFactor / 60.0*/Constants.SwerveDriveConstants.Mk4iMechanicalConstants.drivingFactor/60.0);
         drivingEncoder.setPosition(0);
         // Closed Loop
         drivingController.setFeedbackDevice(drivingEncoder);
-        drivingController.setP(0.4);
-        drivingController.setI(0);
-        drivingController.setD(0.01);
-        drivingController.setFF(drivingVelocityFeedForward);
-        drivingController.setOutputRange(-1, 1);
+        drivingController.setP(drivingPIDConstants.kP());
+        drivingController.setI(drivingPIDConstants.kI());
+        drivingController.setD(drivingPIDConstants.kD());
+        drivingController.setOutputRange(drivingPIDConstants.kMinOutput(), drivingPIDConstants.kMaxOutput());
         drivingMotor.burnFlash();
     }
     
@@ -99,17 +104,19 @@ public class SwerveModule {
         steeringMotor.setSmartCurrentLimit(20);
         steeringMotor.setInverted(true);
         // Encoder
-        double steeringFactor = (2.0 * Math.PI) / Constants.SwerveDriveConstants.angleGearRatio;
+        
         // steeringEncoder.setInverted(isEncoderInverted);
-        steeringEncoder.setPositionConversionFactor(/* Conversion Factor = steeringFactor*/steeringFactor);
-        steeringEncoder.setVelocityConversionFactor(/* Conversion Factor = steeringFactor / 60.0*/steeringFactor/60.0);
+        steeringEncoder.setPositionConversionFactor(
+            /* Conversion Factor = steeringFactor*/Constants.SwerveDriveConstants.Mk4iMechanicalConstants.steeringFactor);
+        steeringEncoder.setVelocityConversionFactor(
+            /* Conversion Factor = steeringFactor / 60.0*/Constants.SwerveDriveConstants.Mk4iMechanicalConstants.steeringFactor/60.0);
         resetSteeringEncoderToAbsolute();
         // Closed Loop
         steeringController.setFeedbackDevice(steeringEncoder);
-        steeringController.setP(1);
-        steeringController.setI(0);
-        steeringController.setD(0.4);
-        steeringController.setOutputRange(-1, 1);
+        steeringController.setP(steeringPIDConstants.kP());
+        steeringController.setI(steeringPIDConstants.kI());
+        steeringController.setD(steeringPIDConstants.kD());
+        steeringController.setOutputRange(steeringPIDConstants.kMinOutput(), steeringPIDConstants.kMaxOutput());
         // Position wrapping enabled
         steeringController.setPositionPIDWrappingEnabled(true);
         steeringController.setPositionPIDWrappingMinInput(- Math.PI);
