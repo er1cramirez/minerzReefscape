@@ -7,8 +7,7 @@ package frc.robot;
 // import frc.robot.commands.Autos;
 // import frc.robot.commands.ExampleCommand;
 import frc.robot.constants.Constants.ControllersConstants;
-// import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.SwerveDriveSubsystem;
+import frc.robot.subsystems.Drivetrain.SwerveDriveSubsystem;
 
 // import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 
@@ -27,7 +26,7 @@ public class RobotContainer {
     // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController ChassisriverController =
       new CommandXboxController(ControllersConstants.chassisControllerPort);
-  private final SwerveDriveSubsystem SwerveDrivetrain = new SwerveDriveSubsystem(ChassisriverController);
+  private final SwerveDriveSubsystem SwerveDrivetrain = new SwerveDriveSubsystem();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings

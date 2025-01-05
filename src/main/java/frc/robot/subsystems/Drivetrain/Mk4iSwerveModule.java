@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Drivetrain;
 // Rev Robotics imports
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -158,7 +158,9 @@ public class Mk4iSwerveModule {
                 System.out.println("Resetting steering encoder to absolute");
             }
         }
+        // Optimize the desired state to minimize the module rotation
         desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
+        // Cosine compensation
         desiredState.speedMetersPerSecond *= desiredState.angle.minus(getState().angle).getCos();
         // Calculate the control output
         drivingController.setReference(desiredState.speedMetersPerSecond, ControlType.kVelocity);//, 0, drivingFeedforward.calculate(desiredState.speedMetersPerSecond));
@@ -166,7 +168,6 @@ public class Mk4iSwerveModule {
         steeringController.setReference(desiredState.angle.getRadians(), ControlType.kPosition);
         // steeringController.setReference(desiredState.angle.getRadians(), ControlType.kPosition, 0, steeringFeedforward.calculate(desiredState.angle.getRadians()));
         // m_turningClosedLoopController.setReference(correctedDesiredState.angle.getRadians(), ControlType.kPosition);
-    
         targetState = desiredState;
     }
 

@@ -27,6 +27,8 @@ public final class Constants {
     // Kinematics
     public static final double kMaxSpeed = 3.0;//m/s
     public static final double kMaxAngularSpeed = Math.PI;//rad/s
+    public static final double kTranslationalSlew = 3.0;//m/s^2
+    public static final double kRotationalSlew = Math.PI/2;//rad/s^2
     // Module positions
     public static final Translation2d frontLeftModulePosition = new Translation2d(chassisWidth / 2, chassisLength / 2);
     public static final Translation2d frontRightModulePosition = new Translation2d(chassisWidth / 2, -chassisLength / 2);
