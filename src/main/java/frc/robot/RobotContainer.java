@@ -1,6 +1,7 @@
 
 package frc.robot;
 
+import frc.robot.auto.LeaveAuto;
 import frc.robot.commands.CalibrateSwerveCommand;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.constants.Constants;
@@ -81,7 +82,7 @@ public class RobotContainer {
     
     public Command getAutonomousCommand() {
         // Return the autonomous command
-        return null; // Replace with actual autonomous command
+        return new LeaveAuto(swerveDriveSubsystem);
     }
 }
   

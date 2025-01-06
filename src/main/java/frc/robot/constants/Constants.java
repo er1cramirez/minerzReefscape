@@ -26,7 +26,7 @@ public final class Constants {
     public static final double chassisLength = Units.inchesToMeters(20);//inch
     // Kinematics
     public static final double kMaxSpeed = 3.0;//m/s
-    public static final double kMaxAngularSpeed = Math.PI;//rad/s
+    public static final double kMaxAngularSpeed = 2;//rad/s
     public static final double kTranslationalSlew = 3.0;//m/s^2
     public static final double kRotationalSlew = Math.PI/2;//rad/s^2
     public static final double kPrecisionModeSpeedMultiplier = 0.5;
