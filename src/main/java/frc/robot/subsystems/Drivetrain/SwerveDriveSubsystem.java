@@ -1,15 +1,23 @@
 package frc.robot.subsystems.Drivetrain;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Constants;
+// import frc.robot.subsystems.Drivetrain.SwerveDriveSubsystem.CalibrationState;
+
+import java.util.Arrays;
+
 import com.kauailabs.navx.frc.AHRS;
 
 /**
@@ -26,21 +34,27 @@ import com.kauailabs.navx.frc.AHRS;
  * </ul>
  */
 public class SwerveDriveSubsystem extends SubsystemBase {
-    // NetworkTables topics for telemetry
-    private static final String CURRENT_STATES_TOPIC = "/SwerveStates/Current";
-    private static final String TARGET_STATES_TOPIC = "/SwerveStates/Target";
-    
-    // Hardware components
+    // Hardware & Configuration
     private final Mk4iSwerveModule[] swerveModules;
     private final AHRS gyro;
     private final SwerveDriveKinematics swerveDriveKinematics;
-
-    // State tracking
+    
+    // State Tracking
+    private DriveMode currentMode = DriveMode.NORMAL;
     private boolean isFieldOriented = true;
     private boolean isDebugMode = false;
+    // Calibration state
 
-    // Telemetry publishers
-    private final StructArrayPublisher<SwerveModuleState> currentStatesPublisher;
+    private boolean isCalibrating = false;
+    private int calibrationRetryCount = 0;
+    private static final int MAX_CALIBRATION_RETRIES = 3;
+    private CalibrationState systemCalibrationState = CalibrationState.IDLE;
+    
+    // Odometry & Position Tracking
+    private final SwerveDriveOdometry odometry;
+    
+    // Telemetry
+     private final StructArrayPublisher<SwerveModuleState> currentStatesPublisher;
     private final StructArrayPublisher<SwerveModuleState> targetStatesPublisher;
     private final SwerveModuleState[] currentStates;
     private final SwerveModuleState[] targetStates;
@@ -53,14 +67,90 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         this.swerveDriveKinematics = Constants.SwerveDriveConstants.kinematics;
         this.swerveModules = initializeSwerveModules();
         this.gyro = new AHRS(SPI.Port.kMXP);
-        
+        // Initialize odometry
+        odometry = new SwerveDriveOdometry(
+            swerveDriveKinematics,
+            getGyroAngle(),
+            getModulePositions()
+        );
+        // Initial calibration
+        calibrateModules();
         // Initialize telemetry arrays and publishers
         this.currentStates = new SwerveModuleState[4];
         this.targetStates = new SwerveModuleState[4];
-        this.currentStatesPublisher = createPublisher(CURRENT_STATES_TOPIC);
-        this.targetStatesPublisher = createPublisher(TARGET_STATES_TOPIC);
-        
+        this.currentStatesPublisher = createPublisher(Constants.TelemetryConstants.SwerveTopicNames.CURRENT_STATES_TOPIC);
+        this.targetStatesPublisher = createPublisher(Constants.TelemetryConstants.SwerveTopicNames.TARGET_STATES_TOPIC);
         resetGyro();
+    }
+    
+    // Drive Control Methods
+
+    /**
+     * Sets the drive mode and applies appropriate configurations
+     */
+    public void setDriveMode(DriveMode mode) {
+        if (mode == currentMode) return;
+        
+        // Handle mode-specific initialization
+        switch (mode) {
+            case X_LOCK:
+                if (currentMode != DriveMode.X_LOCK) {
+                    setModulesToXLock();
+                }
+                break;
+            case AUTONOMOUS:
+                resetOdometry(new Pose2d()); // Reset to starting position
+                break;
+            default:
+                // Reset to normal driving configuration
+                break;
+        }
+        
+        currentMode = mode;
+    }
+
+    private void setModulesToXLock() {
+        SwerveModuleState[] xLockStates = new SwerveModuleState[4];
+        applyModeAdjustments(xLockStates, DriveMode.X_LOCK);
+        for (int i = 0; i < swerveModules.length; i++) {
+            swerveModules[i].setDesiredState(xLockStates[i]);
+        }
+    }
+
+
+    private void applyModeAdjustments(SwerveModuleState[] states, DriveMode mode) {
+        if (states == null || states.length != swerveModules.length) {
+            throw new IllegalArgumentException("Invalid states array");
+        }
+        switch (mode) {
+            case PRECISION:
+                for (SwerveModuleState state : states) {
+                    state.speedMetersPerSecond *= Constants.SwerveDriveConstants.kPrecisionModeSpeedMultiplier;
+                }
+                break;
+            case TURBO:
+                for (SwerveModuleState state : states) {
+                    state.speedMetersPerSecond = Math.min(
+                        state.speedMetersPerSecond * Constants.SwerveDriveConstants.kTurboModeSpeedMultiplier,
+                        Constants.SwerveDriveConstants.kMaxSpeed
+                    );
+                }
+                break;
+            case X_LOCK:
+                for (int i = 0; i < states.length; i++) {
+                    states[i] = new SwerveModuleState(0, getXLockAngle());
+                }
+                break;
+            default:
+                // No adjustments needed
+                break;
+        }
+    }
+    private Rotation2d getXLockAngle() {
+        // Return appropriate angle based on module position (FL, FR, BL, BR)
+        // The zero angle is the front of the robot so the X pattern is 45 degrees
+        // since it is the same for all modules, we can hardcode it
+        return new Rotation2d(Math.PI / 4);
     }
 
     /**
@@ -69,9 +159,79 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * @param chassisSpeeds The desired chassis speeds (x, y, and rotational velocity)
      */
     public void drive(ChassisSpeeds chassisSpeeds) {
-        SwerveModuleState[] desiredStates = swerveDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+        if (isCalibrating) return;
+        
+        SwerveModuleState[] states = swerveDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.SwerveDriveConstants.kMaxSpeed);
+        
+        applyModeAdjustments(states, currentMode);
+        
+        for (int i = 0; i < swerveModules.length; i++) {
+            // Remove mode parameter since it's handled at subsystem level
+            swerveModules[i].setDesiredState(states[i]);
+        }
+    }
+
+    // Mode Management Methods
+
+    
+    // Calibration Methods
+
+    /**
+     * Attempts to calibrate all swerve modules
+     * @return true if all modules calibrated successfully
+     */
+    public boolean calibrateModules() {
+        if (isCalibrating) return false;
+        systemCalibrationState = CalibrationState.IN_PROGRESS;
+        isCalibrating = true;
+        boolean allSuccessful = true;
+        for (int i = 0; i < swerveModules.length; i++) {
+            try {
+                if (!swerveModules[i].calibrate()) {
+                    allSuccessful = false;
+                }
+            } catch (Exception e) {
+                allSuccessful = false;
+            }
+        }
+        
+        systemCalibrationState = allSuccessful ? CalibrationState.SUCCESS : CalibrationState.FAILED;
+        isCalibrating = false;
+        
+        if (!allSuccessful && calibrationRetryCount < MAX_CALIBRATION_RETRIES) {
+            calibrationRetryCount++;
+            Timer.delay(0.1);
+            return calibrateModules();
+        }
+        calibrationRetryCount = 0;
+        return allSuccessful;
+    }
+    
+    // Telemetry Methods
+
+    
+    // Utility Methods
+
+    public Pose2d getPose() {
+        return odometry.getPoseMeters();
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        odometry.resetPosition(getGyroAngle(), getModulePositions(), pose);
+    }
+
+    public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.SwerveDriveConstants.kMaxSpeed);
-        setDesiredStates(desiredStates);
+        for (int i = 0; i < swerveModules.length; i++) {
+            swerveModules[i].setDesiredState(desiredStates[i]);
+        }
+    }
+
+    private SwerveModulePosition[] getModulePositions() {
+        return Arrays.stream(swerveModules)
+            .map(module -> module.getPosition())
+            .toArray(SwerveModulePosition[]::new);
     }
 
     /**
@@ -124,26 +284,31 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Update odometry
+        odometry.update(getGyroAngle(), getModulePositions());
+        
+        // Periodic calibration check
+        if (currentMode != DriveMode.AUTONOMOUS && 
+            currentMode != DriveMode.X_LOCK && 
+            !isCalibrating) {
+            checkModuleCalibration();
+        }
+        
         if (isDebugMode) {
-            updateModuleStates();
-            publishTelemetry();
+            updateTelemetry();
+        }
+    }
+    private void checkModuleCalibration() {
+        for (Mk4iSwerveModule module : swerveModules) {
+            if (module.getCalibrationState() != ModuleCalibrationState.CALIBRATED) {
+                calibrateModules();
+                break;
+            }
         }
     }
 
-    /**
-     * Sets the desired states for all swerve modules.
-     * 
-     * @param desiredStates Array of desired states for each module
-     * @throws IllegalArgumentException if desiredStates length doesn't match module count
-     */
-    public void setDesiredStates(SwerveModuleState[] desiredStates) {
-        if (desiredStates.length != swerveModules.length) {
-            throw new IllegalArgumentException("Desired states array length must match number of modules");
-        }
-        
-        for (int i = 0; i < swerveModules.length; i++) {
-            swerveModules[i].setDesiredState(desiredStates[i]);
-        }
+    public CalibrationState getSystemCalibrationState() {
+        return systemCalibrationState;
     }
 
     /**
@@ -188,6 +353,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private void publishTelemetry() {
         currentStatesPublisher.set(currentStates);
         targetStatesPublisher.set(targetStates);
+    }
+
+    /**
+     * Updates telemetry data for all swerve modules.
+     */
+    private void updateTelemetry() {
+        updateModuleStates();
+        publishTelemetry();
     }
 
     @Override

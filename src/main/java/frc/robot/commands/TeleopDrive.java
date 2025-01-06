@@ -1,15 +1,17 @@
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.Constants;
+import frc.robot.subsystems.Drivetrain.CalibrationState;
 import frc.robot.subsystems.Drivetrain.SwerveDriveSubsystem;
 
 /**
- * TeleopDrive implements manual control of the swerve drive system using an Xbox controller.
+ * TeleopDrive implements manual control of the swerve drive system using provided velocity inputs.
+ * This command processes raw inputs into smooth, controlled chassis movements.
  * 
  * <p>Features:
  * <ul>
@@ -17,11 +19,19 @@ import frc.robot.subsystems.Drivetrain.SwerveDriveSubsystem;
  *   <li>Deadband application for precise control</li>
  *   <li>Support for both field-oriented and robot-oriented control</li>
  *   <li>Speed limiting based on configuration constants</li>
+ *   <li>Input supplier flexibility for different control sources</li>
  * </ul>
  */
 public class TeleopDrive extends Command {
+    private static final double STOPPING_THRESHOLD = 0.01;
+
+    // Subsystem
     private final SwerveDriveSubsystem swerveDriveSubsystem;
-    private final XboxController controller;
+    
+    // Input suppliers
+    private final DoubleSupplier translationXSupplier;
+    private final DoubleSupplier translationYSupplier;
+    private final DoubleSupplier rotationSupplier;
     
     // Input processing
     private final SlewRateLimiter xLimiter;
@@ -31,14 +41,23 @@ public class TeleopDrive extends Command {
     /**
      * Creates a new TeleopDrive command.
      *
-     * @param swerveDriveSubsystem The subsystem used by this command
-     * @param controller The Xbox controller used for driver input
+     * @param swerveDriveSubsystem The swerve drive subsystem
+     * @param translationXSupplier Supplier for forward/backward movement (-1 to 1)
+     * @param translationYSupplier Supplier for left/right movement (-1 to 1)
+     * @param rotationSupplier Supplier for rotational movement (-1 to 1)
      */
-    public TeleopDrive(SwerveDriveSubsystem swerveDriveSubsystem, XboxController controller) {
-        this.swerveDriveSubsystem = swerveDriveSubsystem;
-        this.controller = controller;
+    public TeleopDrive(
+            SwerveDriveSubsystem swerveDriveSubsystem,
+            DoubleSupplier translationXSupplier,
+            DoubleSupplier translationYSupplier,
+            DoubleSupplier rotationSupplier) {
         
-        // Initialize slew rate limiters with configured rates
+        this.swerveDriveSubsystem = swerveDriveSubsystem;
+        this.translationXSupplier = translationXSupplier;
+        this.translationYSupplier = translationYSupplier;
+        this.rotationSupplier = rotationSupplier;
+        
+        // Initialize slew rate limiters
         this.xLimiter = new SlewRateLimiter(Constants.SwerveDriveConstants.kTranslationalSlew);
         this.yLimiter = new SlewRateLimiter(Constants.SwerveDriveConstants.kTranslationalSlew);
         this.rotLimiter = new SlewRateLimiter(Constants.SwerveDriveConstants.kRotationalSlew);
@@ -48,31 +67,54 @@ public class TeleopDrive extends Command {
 
     @Override
     public void execute() {
-        // Get and process joystick inputs
-        double xSpeed = processInput(
-            controller.getLeftX(),
+        // Don't process drive commands during calibration
+        if (swerveDriveSubsystem.getSystemCalibrationState() == CalibrationState.IN_PROGRESS) {
+            return;
+        }
+        
+        // Get raw inputs from suppliers
+        double xSpeed = translationXSupplier.getAsDouble();
+        double ySpeed = translationYSupplier.getAsDouble();
+        double rotSpeed = rotationSupplier.getAsDouble();
+        
+        // Process inputs with deadband and slew rate limiting
+        xSpeed = processInput(
+            xSpeed,
             Constants.ControllersConstants.chassisControllerDeadband,
             xLimiter,
             Constants.SwerveDriveConstants.kMaxSpeed
         );
         
-        double ySpeed = processInput(
-            controller.getLeftY(),
+        ySpeed = processInput(
+            ySpeed,
             Constants.ControllersConstants.chassisControllerDeadband,
             yLimiter,
             Constants.SwerveDriveConstants.kMaxSpeed
         );
         
-        double rotSpeed = processInput(
-            controller.getRightX(),
+        rotSpeed = processInput(
+            rotSpeed,
             Constants.ControllersConstants.chassisControllerDeadband,
             rotLimiter,
             Constants.SwerveDriveConstants.kMaxAngularSpeed
         );
 
-        // Create and apply chassis speeds
+        // Check if inputs are below stopping threshold
+        if (Math.abs(xSpeed) < STOPPING_THRESHOLD && 
+            Math.abs(ySpeed) < STOPPING_THRESHOLD && 
+            Math.abs(rotSpeed) < STOPPING_THRESHOLD) {
+            swerveDriveSubsystem.drive(new ChassisSpeeds());
+            return;
+        }
+
+        // Create chassis speeds based on orientation mode
         ChassisSpeeds chassisSpeeds = swerveDriveSubsystem.isFieldOriented()
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rotSpeed, swerveDriveSubsystem.getGyroAngle())
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                xSpeed,
+                ySpeed,
+                rotSpeed,
+                swerveDriveSubsystem.getGyroAngle()
+            )
             : new ChassisSpeeds(xSpeed, ySpeed, rotSpeed);
         
         swerveDriveSubsystem.drive(chassisSpeeds);
@@ -81,7 +123,7 @@ public class TeleopDrive extends Command {
     /**
      * Processes a raw input value by applying deadband, slew rate limiting, and scaling.
      *
-     * @param input Raw input value from controller
+     * @param input Raw input value (-1 to 1)
      * @param deadband Deadband value to apply
      * @param limiter SlewRateLimiter for smooth acceleration
      * @param maxSpeed Maximum speed to scale to

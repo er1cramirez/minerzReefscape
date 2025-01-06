@@ -29,6 +29,10 @@ public final class Constants {
     public static final double kMaxAngularSpeed = Math.PI;//rad/s
     public static final double kTranslationalSlew = 3.0;//m/s^2
     public static final double kRotationalSlew = Math.PI/2;//rad/s^2
+    public static final double kPrecisionModeSpeedMultiplier = 0.5;
+    public static final double kTurboModeSpeedMultiplier = 1.5;
+    public static final double kXLockModeSpeedMultiplier = 0.0;
+    public static final double kSteeringErrorTolerance = 0.1; // rad
     // Module positions
     public static final Translation2d frontLeftModulePosition = new Translation2d(chassisWidth / 2, chassisLength / 2);
     public static final Translation2d frontRightModulePosition = new Translation2d(chassisWidth / 2, -chassisLength / 2);
@@ -75,20 +79,20 @@ public final class Constants {
       1, 0, 0.4, 0, 0, 1, -1);
     // Module constants
     public static final Mk4iSwerveModuleConstants frontLeftModuleConstants = new Mk4iSwerveModuleConstants(
-      1, 2, 16, frontLeftSteerOffset, 
-      false, false, false, 
+      1, 1, 2, 16, frontLeftSteerOffset, 
+      false, true, false, 
       drivePIDConstants, steerPIDConstants);
     public static final Mk4iSwerveModuleConstants frontRightModuleConstants = new Mk4iSwerveModuleConstants(
-      5, 6, 19, frontRightSteerOffset, 
-      false, false, false, 
+      2, 5, 6, 19, frontRightSteerOffset, 
+      false, true, false, 
       drivePIDConstants, steerPIDConstants);
     public static final Mk4iSwerveModuleConstants backLeftModuleConstants = new Mk4iSwerveModuleConstants(
-      3, 4, 17, backLeftSteerOffset, 
-      false, false, false, 
+      3, 3, 4, 17, backLeftSteerOffset, 
+      false, true, false, 
       drivePIDConstants, steerPIDConstants);
     public static final Mk4iSwerveModuleConstants backRightModuleConstants = new Mk4iSwerveModuleConstants(
-      7, 8, 18, backRightSteerOffset, 
-      false, false, false, 
+      4, 7, 8, 18, backRightSteerOffset, 
+      false, true, false, 
       drivePIDConstants, steerPIDConstants);
 
     
@@ -117,6 +121,17 @@ public final class Constants {
     // Neutral Modes
     public static final IdleMode driveIdleMode = IdleMode.kBrake;
     public static final IdleMode steerIdleMode = IdleMode.kBrake;
+  }
+
+  // Telemetry constants
+  public static final class TelemetryConstants {
+    public static final double kTelemetryTransmissionInterval = 0.1;
+    public static final class SwerveTopicNames {
+      // NetworkTables topics for telemetry
+      public static final String CURRENT_STATES_TOPIC = "/SwerveStates/Current";
+      public static final String TARGET_STATES_TOPIC = "/SwerveStates/Target";
+    }
+    
   }
 
 }

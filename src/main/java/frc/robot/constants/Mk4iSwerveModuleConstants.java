@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * @param steeringPIDConstants The PID constants for the steering motor
  */
 public record Mk4iSwerveModuleConstants(
+    int moduleNumber,
     int drivingMotorID,
     int steeringMotorID,
     int steerAbsoluteEncoderID,
