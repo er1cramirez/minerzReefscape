@@ -3,9 +3,13 @@ package frc.robot.subsystems.swerve;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+// import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -94,9 +98,44 @@ public class SwerveModule extends SubsystemBase{
     // Configuration methods
 
     private void drivingMotorInit(){
+        SparkMaxConfig drivingConfig = new SparkMaxConfig();
+        drivingConfig.inverted(moduleConstants.isDriveMotorInverted());
+        drivingConfig.smartCurrentLimit(Constants.MotorConstants.driveCurrentLimit);
+        drivingConfig.voltageCompensation(Constants.MotorConstants.voltageCompensation);
+        drivingConfig.idleMode(Constants.MotorConstants.driveIdleMode);
+        double drivingFactor = Constants.SwerveConstants.Mk4iMechanicalConstants.drivingFactor;
+        drivingConfig.encoder.positionConversionFactor(drivingFactor);
+        drivingConfig.encoder.velocityConversionFactor(drivingFactor / 60.0);
+        // drivingConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+        drivingConfig.closedLoop.p(moduleConstants.drivingPIDConstants().kP());
+        drivingConfig.closedLoop.i(moduleConstants.drivingPIDConstants().kI());
+        drivingConfig.closedLoop.d(moduleConstants.drivingPIDConstants().kD());
+        drivingConfig.closedLoop.minOutput(moduleConstants.drivingPIDConstants().kMinOutput());
+        drivingConfig.closedLoop.maxOutput(moduleConstants.drivingPIDConstants().kMaxOutput());
+        drivingMotor.configure(drivingConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        // encoder reset
+        drivingEncoder.setPosition(0);
     }
 
     private void steeringMotorInit(){
+        SparkMaxConfig steeringConfig = new SparkMaxConfig();
+        steeringConfig.inverted(moduleConstants.isSteerMotorInverted());
+        steeringConfig.smartCurrentLimit(Constants.MotorConstants.steerCurrentLimit);
+        steeringConfig.voltageCompensation(Constants.MotorConstants.voltageCompensation);
+        steeringConfig.idleMode(Constants.MotorConstants.steerIdleMode);
+        double steeringFactor = Constants.SwerveConstants.Mk4iMechanicalConstants.steeringFactor;
+        steeringConfig.encoder.positionConversionFactor(steeringFactor);
+        steeringConfig.encoder.velocityConversionFactor(steeringFactor / 60.0);
+        // steeringConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+        steeringConfig.closedLoop.p(moduleConstants.steeringPIDConstants().kP());
+        steeringConfig.closedLoop.i(moduleConstants.steeringPIDConstants().kI());
+        steeringConfig.closedLoop.d(moduleConstants.steeringPIDConstants().kD());
+        steeringConfig.closedLoop.minOutput(moduleConstants.steeringPIDConstants().kMinOutput());
+        steeringConfig.closedLoop.maxOutput(moduleConstants.steeringPIDConstants().kMaxOutput());
+        steeringConfig.closedLoop.positionWrappingEnabled(true);
+        steeringConfig.closedLoop.positionWrappingInputRange(-Math.PI, Math.PI);
+
+        steeringMotor.configure(steeringConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         resetSteeringEncoderToAbsolute();
     }
 
@@ -117,17 +156,9 @@ public class SwerveModule extends SubsystemBase{
         return new Rotation2d(steeringEncoder.getPosition());
     }
 
-    // CANCoder methods
-    /*
-     * public StatusSignal<Angle> getAbsolutePosition()
-        Absolute Position of the device. The possible range is documented below; however, the exact expected range is determined by the AbsoluteSensorDiscontinuityPoint. This position is only affected by the MagnetSensor configs.
-        Minimum Value: -1.0
-        Maximum Value: 0.999755859375
-        Default Value: 0
-        Units: rotations
-     */
     private Rotation2d getAbsoluteSteer(){
-        return Rotation2d.fromRotations(steerAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()).minus(moduleConstants.steerAngleOffset());
+        return Rotation2d.fromRotations(
+            steerAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()).minus(moduleConstants.steerAngleOffset());
     }
 
     /**
