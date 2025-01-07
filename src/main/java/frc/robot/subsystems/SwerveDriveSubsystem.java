@@ -8,6 +8,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
@@ -30,6 +32,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(frontLeftLocation, frontRightLocation, backLeftLocation, backRightLocation);
     
     CommandXboxController driverController;
+
+    // Field visualization
+    private final Field2d field = new Field2d();
 
     // For debugging purposes
     private final StructArrayPublisher<SwerveModuleState> currentStatesPublisher;
@@ -89,11 +94,63 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     public ChassisSpeeds getSpeedsFromController() {
-        double forward = -driverController.getLeftY();
-        double strafe = -driverController.getLeftX();
+        double forward = -3*driverController.getLeftY();
+        double strafe = -3*driverController.getLeftX();
         double rotation = driverController.getRightX();
 
         return new ChassisSpeeds(forward, strafe, rotation);
+    }
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        super.initSendable(builder);
+        
+        // Set the widget type
+        builder.setSmartDashboardType("SwerveDrive");
+
+        
+        // Front Left Module (0)
+        builder.addDoubleProperty("Front Left Angle", 
+            () -> frontLeftModule.getTargetState().angle.getRadians(), null);
+        builder.addDoubleProperty("Front Left Velocity", 
+            () -> frontLeftModule.getTargetState().speedMetersPerSecond, null);
+        // builder.addDoubleProperty("Front Left Target Angle", 
+        //     () -> frontLeftModule.getTargetState().angle.getRadians(), null);
+        // builder.addDoubleProperty("Front Left Target Velocity", 
+        //     () -> frontLeftModule.getTargetState().speedMetersPerSecond, null);
+
+        
+        // Front Right Module (1)
+        builder.addDoubleProperty("Front Right Angle", 
+            () -> frontRightModule.getTargetState().angle.getRadians(), null);
+        builder.addDoubleProperty("Front Right Velocity", 
+            () -> frontRightModule.getTargetState().speedMetersPerSecond, null);
+        // builder.addDoubleProperty("Front Right Target Angle", 
+        //     () -> frontRightModule.getTargetState().angle.getRadians(), null);
+        // builder.addDoubleProperty("Front Right Target Velocity", 
+        //     () -> frontRightModule.getTargetState().speedMetersPerSecond, null);
+
+        
+        // Back Left Module (2)
+        builder.addDoubleProperty("Back Left Angle", 
+            () -> backLeftModule.getTargetState().angle.getRadians(), null);
+        builder.addDoubleProperty("Back Left Velocity", 
+            () -> backLeftModule.getTargetState().speedMetersPerSecond, null);
+        // builder.addDoubleProperty("Back Left Target Angle", 
+        //     () -> backLeftModule.getTargetState().angle.getRadians(), null);
+        // builder.addDoubleProperty("Back Left Target Velocity", 
+        //     () -> backLeftModule.getTargetState().speedMetersPerSecond, null);
+
+        
+        // Back Right Module (3)
+        builder.addDoubleProperty("Back Right Angle", 
+            () -> backRightModule.getTargetState().angle.getRadians(), null);
+        builder.addDoubleProperty("Back Right Velocity", 
+            () -> backRightModule.getTargetState().speedMetersPerSecond, null);
+        // builder.addDoubleProperty("Back Right Target Angle", 
+        //     () -> backRightModule.getTargetState().angle.getRadians(), null);
+        // builder.addDoubleProperty("Back Right Target Velocity", 
+        //     () -> backRightModule.getTargetState().speedMetersPerSecond, null);
+
     }
 
 }

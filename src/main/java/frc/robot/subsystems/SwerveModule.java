@@ -144,15 +144,8 @@ public class SwerveModule {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        if (++resetIteration >= 1000) {
-            if (steeringEncoder.getVelocity() < 0.1) {
-                resetIteration = 0;
-                resetSteeringEncoderToAbsolute();
-                System.out.println("Resetting steering encoder to absolute");
-            }
-        }
         desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
-        desiredState.speedMetersPerSecond *= desiredState.angle.minus(getState().angle).getCos();
+        // desiredState.speedMetersPerSecond *= desiredState.angle.minus(getState().angle).getCos();
         // Calculate the control output
         drivingController.setReference(desiredState.speedMetersPerSecond, ControlType.kVelocity);//, 0, drivingFeedforward.calculate(desiredState.speedMetersPerSecond));
         // m_drivingClosedLoopController.setReference(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
