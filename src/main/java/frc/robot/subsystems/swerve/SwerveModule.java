@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -223,6 +224,13 @@ public class SwerveModule extends SubsystemBase{
 
     public SwerveModuleState getCurrentState() {
         return currentState;
+    }
+
+
+    public SwerveModulePosition getModulePosition() {
+        return new SwerveModulePosition(
+            drivingEncoder.getPosition(),
+            getModuleSteer());
     }
 
     /**
