@@ -43,6 +43,12 @@ public class RobotContainer {
           !swerve.isFieldRelative()
         )
       ));
+
+    // Swerve module steering resync
+    new JoystickButton(chassisController, XboxController.Button.kStart.value)
+      .onTrue(new InstantCommand(
+        () -> swerve.calibrateSteeringEncoders()
+      ));
   }
 
   public Command getAutonomousCommand() {

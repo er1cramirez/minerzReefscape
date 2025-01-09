@@ -187,7 +187,7 @@ public class SwerveModule extends SubsystemBase{
     }
 
 
-    public SwerveModuleOperationState getCalibrationState() {
+    private SwerveModuleOperationState getCalibrationState() {
         // Only check if we think we're calibrated
         if (operationState == SwerveModuleOperationState.CALIBRATED) {
             try {
@@ -218,6 +218,7 @@ public class SwerveModule extends SubsystemBase{
                     return false;
                 }
             }
+            return true;
         }
         return false;
     }

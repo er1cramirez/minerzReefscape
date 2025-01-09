@@ -25,7 +25,8 @@ public class SwerveDrivetrain extends SubsystemBase{
     // Kinematics & Odometry
     private final SwerveDriveKinematics kinematics;
     private final SwerveDriveOdometry odometry;
-    
+    private Pose2d pose;
+
     // Telemetry
     private final SwerveDrivetrainTelemetry telemetry;
     
@@ -47,14 +48,20 @@ public class SwerveDrivetrain extends SubsystemBase{
         gyro = new AHRS(/*USB */AHRS.NavXComType.kUSB1);
         // Initialize kinematics and odometry
         kinematics = Constants.SwerveConstants.kinematics;
-        odometry = new SwerveDriveOdometry(
-            kinematics, 
-            getRobotHeading(), 
-            getModulePositions());
+        resetRobotHeading(true);
+        // Initialize odometry with initial position
+        this.odometry = new SwerveDriveOdometry(
+            kinematics,
+            getRobotHeading(),
+            getModulePositions(),
+            new Pose2d()
+        );
+        
+        pose = new Pose2d();
         // Initialize telemetry
         telemetry = new SwerveDrivetrainTelemetry(this);
-        SmartDashboard.putData("SwerveDrivetrain", telemetry);
-        resetRobotHeading(true);
+        SmartDashboard.putData("Swerve Drive", telemetry);
+        
     }
 
     // Methods
@@ -99,14 +106,24 @@ public class SwerveDrivetrain extends SubsystemBase{
 
     
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return pose;
     }
 
     public void resetPose(Pose2d pose) {
-        odometry.resetPosition(getRobotHeading(), getModulePositions(), pose);
+        odometry.resetPosition(
+            getRobotHeading(), 
+            getModulePositions(), 
+            pose);
+        this.pose = pose;
     }
 
-    
+    /**
+     * Gets the swerve drive kinematics.
+     * @return The kinematics
+     */
+    public SwerveDriveKinematics getKinematics() {
+        return kinematics;
+    }
 
     public SwerveModuleState[] getCurrentStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
@@ -142,6 +159,17 @@ public class SwerveDrivetrain extends SubsystemBase{
 
     public void setLockMode(){
         // Set the swerve modules to lock mode(x pattern)
+    }
+
+    public void calibrateSteeringEncoders(){
+        // Calibrate the steering encoders
+        boolean allCalibrated = false;
+        for (int i = 0; i < swerveModules.length; i++) {
+            allCalibrated &= swerveModules[i].calibrateSteering();
+        }
+        if(allCalibrated){
+            // Logger.getInstance().recordOutput("Calibration/Steering", true);
+        }
     }
 
     public void testEachModule() {
@@ -182,7 +210,11 @@ public class SwerveDrivetrain extends SubsystemBase{
      */
     @Override
     public void periodic(){
-        // This method will be called once per scheduler run
+        // Update odometry
+        pose = odometry.update(
+            getRobotHeading(),
+            getModulePositions()
+        );
     }
 
     /**
