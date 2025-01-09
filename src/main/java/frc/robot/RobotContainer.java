@@ -4,15 +4,46 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.TeleopDrive;
+import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
 public class RobotContainer {
+  // The robot's subsystems and commands are defined here...
+  private final SwerveDrivetrain swerve = new SwerveDrivetrain();
+
+
+  // Controllers
+  private final XboxController chassisController = new XboxController(0);
   public RobotContainer() {
+    configureCommands();
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureCommands() {
+    swerve.setDefaultCommand(new TeleopDrive(
+      swerve,
+      () -> chassisController.getLeftY(), // Forward/Backward
+      () -> chassisController.getLeftX(), // Left/Right
+      () -> chassisController.getRightX() // Rotation
+    ));
+      
+  }
+  private void configureBindings() {
+    // Configure button bindings
+
+    // Field relative drive
+    new JoystickButton(chassisController, XboxController.Button.kB.value)
+      .onTrue(new InstantCommand(
+        () -> swerve.setFieldRelative(
+          !swerve.isFieldRelative()
+        )
+      ));
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
