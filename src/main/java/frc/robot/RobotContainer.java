@@ -27,8 +27,8 @@ public class RobotContainer {
   private void configureCommands() {
     swerve.setDefaultCommand(new TeleopDrive(
       swerve,
-      () -> chassisController.getLeftY(), // Forward/Backward
-      () -> chassisController.getLeftX(), // Left/Right
+      () -> -chassisController.getLeftY(), // Forward/Backward
+      () -> -chassisController.getLeftX(), // Left/Right
       () -> chassisController.getRightX() // Rotation
     ));
       

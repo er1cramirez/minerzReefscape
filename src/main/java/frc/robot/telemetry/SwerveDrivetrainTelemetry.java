@@ -2,6 +2,7 @@ package frc.robot.telemetry;
 
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import frc.robot.Constants;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
 public class SwerveDrivetrainTelemetry implements SubsystemTelemetry {
@@ -39,6 +40,10 @@ public class SwerveDrivetrainTelemetry implements SubsystemTelemetry {
             
         builder.addStringProperty("rotationUnit",
             () -> "radians", null);
+
+        // Max Speed (in meters per second)
+        builder.addDoubleProperty("maxSpeed",
+            () -> Constants.SwerveConstants.maxSpeed, null);
 
 
         // Independent Controls
