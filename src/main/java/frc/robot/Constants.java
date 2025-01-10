@@ -112,6 +112,22 @@ public class Constants {
         public static final IdleMode steerIdleMode = IdleMode.kBrake;
     }
 
+    public static final class ElevatorConstants {
+        public static final int LEFT_MOTOR_ID = 0;
+        public static final int RIGHT_MOTOR_ID = 0;
+        public static final int BOTTOM_LIMIT_SWITCH_PORT = 0;
+        public static final int TOP_LIMIT_SWITCH_PORT = 0;
+        public static final double MAX_VELOCITY = 0.5;
+        public static final double MAX_ACCELERATION = 0.5;
+        public static final boolean MOTOR_INVERTED = false;
+        public static final int CURRENT_LIMIT = 40;
+        public static final IdleMode IDLE_MODE = IdleMode.kBrake;
+        public static final double POS_FACTOR = 1.0;
+        // PID constants
+        public static final PIDConstants elevatorPID = new PIDConstants(
+            0.4, 0, 0.01, 0, 0, 1, -1);
+    }
+
     public static final class AutoConstants {
         public static final double kPXController = 1;
         public static final double kPYController = 1;

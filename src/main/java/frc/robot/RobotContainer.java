@@ -9,16 +9,22 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.ElevatorControlCommand;
 import frc.robot.commands.TeleopDrive;
+import frc.robot.commands.TeleopElevator;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.util.ElevatorStates;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveDrivetrain swerve = new SwerveDrivetrain();
+  private final Elevator elevator = new Elevator();
 
 
   // Controllers
   private final XboxController chassisController = new XboxController(0);
+  private final XboxController mechanismController = new XboxController(1);
   public RobotContainer() {
     configureCommands();
     configureBindings();
@@ -31,7 +37,12 @@ public class RobotContainer {
       () -> -chassisController.getLeftX(), // Left/Right
       () -> chassisController.getRightX() // Rotation
     ));
-      
+    
+    // Manual control
+    elevator.setDefaultCommand(new TeleopElevator(
+      elevator,
+      () -> (mechanismController.getRightTriggerAxis() - mechanismController.getLeftTriggerAxis())
+    ));
   }
   private void configureBindings() {
     // Configure button bindings
@@ -49,6 +60,14 @@ public class RobotContainer {
       .onTrue(new InstantCommand(
         () -> swerve.calibrateSteeringEncoders()
       ));
+
+    // Preset positions
+    new JoystickButton(mechanismController, XboxController.Button.kA.value)
+      .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L1));
+
+    new JoystickButton(mechanismController, XboxController.Button.kB.value)
+      .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L2));
+
   }
 
   public Command getAutonomousCommand() {
