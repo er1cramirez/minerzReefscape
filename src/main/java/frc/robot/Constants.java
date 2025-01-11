@@ -114,9 +114,9 @@ public class Constants {
 
     public static final class ElevatorConstants {
         public static final int LEFT_MOTOR_ID = 0;
-        public static final int RIGHT_MOTOR_ID = 0;
-        public static final int BOTTOM_LIMIT_SWITCH_PORT = 0;
-        public static final int TOP_LIMIT_SWITCH_PORT = 0;
+        public static final int RIGHT_MOTOR_ID = 1;
+        public static final int BOTTOM_LIMIT_SWITCH_PORT = 2;
+        public static final int TOP_LIMIT_SWITCH_PORT = 3;
         public static final double MAX_VELOCITY = 0.5;
         public static final double MAX_ACCELERATION = 0.5;
         public static final boolean MOTOR_INVERTED = false;

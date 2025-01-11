@@ -4,16 +4,21 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+// import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ElevatorControlCommand;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.TeleopElevator;
+import frc.robot.commands.auto.ComplexAutoCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
+import frc.robot.telemetry.RobotTelemetry;
 import frc.robot.util.ElevatorStates;
 
 public class RobotContainer {
@@ -21,13 +26,30 @@ public class RobotContainer {
   private final SwerveDrivetrain swerve = new SwerveDrivetrain();
   private final Elevator elevator = new Elevator();
 
+  // Robot telemetry
+  private final RobotTelemetry telemetry = new RobotTelemetry();
 
   // Controllers
   private final XboxController chassisController = new XboxController(0);
   private final XboxController mechanismController = new XboxController(1);
+  // Auto Commands
+  private final Command complexCommand;
   public RobotContainer() {
     configureCommands();
     configureBindings();
+
+    // Camera
+    CameraServer.startAutomaticCapture();
+    SmartDashboard.putData(CommandScheduler.getInstance());
+    // Auto Commands
+    complexCommand = new ComplexAutoCommand(
+      swerve,
+      elevator
+    );
+
+    // Configure telemetry
+    telemetry.addAutoCommand("Test Autp", complexCommand);
+    telemetry.initDashboard();
   }
 
   private void configureCommands() {
@@ -71,6 +93,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return telemetry.getSelectedAuto();
   }
 }

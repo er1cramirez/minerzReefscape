@@ -1,5 +1,8 @@
 package frc.robot.subsystems.swerve;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -9,13 +12,15 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.telemetry.SwerveDrivetrainTelemetry;
+// import frc.robot.telemetry.SwerveDrivetrainTelemetry;
+import frc.robot.telemetry.SwerveTelemetry;
 
 public class SwerveDrivetrain extends SubsystemBase{
     // Hardware
@@ -28,7 +33,9 @@ public class SwerveDrivetrain extends SubsystemBase{
     private Pose2d pose;
 
     // Telemetry
-    private final SwerveDrivetrainTelemetry telemetry;
+    private final SwerveTelemetry telemetry;
+    private final Map<String, Trajectory> trajectories = new HashMap<>();
+    private String activeTrajectoryName = "";
     
     // State
     // private ChassisSpeeds currentSpeeds = new ChassisSpeeds();
@@ -59,7 +66,7 @@ public class SwerveDrivetrain extends SubsystemBase{
         
         pose = new Pose2d();
         // Initialize telemetry
-        telemetry = new SwerveDrivetrainTelemetry(this);
+        telemetry = new SwerveTelemetry(this);
         SmartDashboard.putData("Swerve Drive", telemetry);
         
     }
@@ -205,6 +212,22 @@ public class SwerveDrivetrain extends SubsystemBase{
             swerveModules[i].setDesiredState(new SwerveModuleState());
         }
     }
+
+    // Trajectory visualization methods
+    public void addTrajectory(String name, Trajectory trajectory) {
+        trajectories.put(name, trajectory);
+    }
+
+    public Map<String, Trajectory> getTrajectories(){
+        return trajectories;
+    }
+    public void setActiveTrajectory(String name) {
+        activeTrajectoryName = name;
+    }
+
+    public String getActiveTrajectoryName() {
+        return activeTrajectoryName;
+    }
     /**
      * Periodic method.
      */
@@ -215,6 +238,7 @@ public class SwerveDrivetrain extends SubsystemBase{
             getRobotHeading(),
             getModulePositions()
         );
+        telemetry.updateTelemetry();
     }
 
     /**
