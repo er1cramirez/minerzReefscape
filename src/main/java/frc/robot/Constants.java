@@ -25,11 +25,10 @@ public class Constants {
         // Kinematics
         public static final double maxSpeed = 3.0;//m/s
         public static final double maxAngularSpeed = 2;//rad/s
-        public static final double translationalSlew = 3.0;//m/s^2
+        public static final double translationalSlew = 1.5;//m/s^2
         public static final double rotationalSlew = Math.PI/2;//rad/s^2
         public static final double precisionModeSpeedMultiplier = 0.5;
         public static final double turboModeSpeedMultiplier = 1.5;
-        public static final double xLockModeSpeedMultiplier = 0.0;
         public static final double steeringErrorTolerance = 0.1; // rad
         public static final double speedDeadband = 0.05; // m/s
         // Module positions
@@ -123,6 +122,7 @@ public class Constants {
         public static final int CURRENT_LIMIT = 40;
         public static final IdleMode IDLE_MODE = IdleMode.kBrake;
         public static final double POS_FACTOR = 1.0;
+        
         // PID constants
         public static final PIDConstants elevatorPID = new PIDConstants(
             0.4, 0, 0.01, 0, 0, 1, -1);
