@@ -24,14 +24,14 @@ import frc.robot.util.ElevatorStates;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveDrivetrain swerve = new SwerveDrivetrain();
-  private final Elevator elevator = new Elevator();
+  // private final Elevator elevator = new Elevator();
 
   // Robot telemetry
   private final RobotTelemetry telemetry = new RobotTelemetry();
 
   // Controllers
   private final XboxController chassisController = new XboxController(0);
-  private final XboxController mechanismController = new XboxController(1);
+  // private final XboxController mechanismController = new XboxController(1);
   // Auto Commands
   private final Command complexCommand;
   public RobotContainer() {
@@ -42,13 +42,14 @@ public class RobotContainer {
     CameraServer.startAutomaticCapture();
     SmartDashboard.putData(CommandScheduler.getInstance());
     // Auto Commands
-    complexCommand = new ComplexAutoCommand(
-      swerve,
-      elevator
-    );
+    // complexCommand = new ComplexAutoCommand(
+    //   swerve,
+    //   elevator
+    // );
+    complexCommand = new InstantCommand();
 
     // Configure telemetry
-    telemetry.addAutoCommand("Test Autp", complexCommand);
+    telemetry.addAutoCommand("Test Auto", complexCommand);
     telemetry.initDashboard();
   }
 
@@ -61,10 +62,10 @@ public class RobotContainer {
     ));
     
     // Manual control
-    elevator.setDefaultCommand(new TeleopElevator(
-      elevator,
-      () -> (mechanismController.getRightTriggerAxis() - mechanismController.getLeftTriggerAxis())
-    ));
+    // elevator.setDefaultCommand(new TeleopElevator(
+    //   elevator,
+    //   () -> (mechanismController.getRightTriggerAxis() - mechanismController.getLeftTriggerAxis())
+    // ));
   }
   private void configureBindings() {
     // Configure button bindings
@@ -84,11 +85,11 @@ public class RobotContainer {
       ));
 
     // Preset positions
-    new JoystickButton(mechanismController, XboxController.Button.kA.value)
-      .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L1));
+    // new JoystickButton(mechanismController, XboxController.Button.kA.value)
+    //   .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L1));
 
-    new JoystickButton(mechanismController, XboxController.Button.kB.value)
-      .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L2));
+    // new JoystickButton(mechanismController, XboxController.Button.kB.value)
+    //   .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L2));
 
   }
 
