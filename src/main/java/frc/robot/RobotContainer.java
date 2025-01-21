@@ -17,6 +17,7 @@ import frc.robot.commands.TeleopAlgaeGrabber;
 import frc.robot.commands.TeleopCoralArm;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.TeleopSimpleElevator;
+import frc.robot.commands.auto.TimedAutoExample;
 // import frc.robot.commands.TeleopElevator;
 import frc.robot.commands.TeleopCoralGrabber;
 // import frc.robot.commands.auto.ComplexAutoCommand;
@@ -45,6 +46,7 @@ public class RobotContainer {
   private final XboxController mechanismController = new XboxController(1);
   // Auto Commands
   private final Command complexCommand;
+  private final Command simpleTimedAuto;
   public RobotContainer() {
     configureCommands();
     configureBindings();
@@ -57,10 +59,18 @@ public class RobotContainer {
     //   swerve,
     //   elevator
     // );
+    simpleTimedAuto = new TimedAutoExample(
+        swerve,
+        elevator,
+        coralGrabber,
+        coralArm,
+        algaeGrabber
+    );
     complexCommand = new InstantCommand();
 
     // Configure telemetry
     telemetry.addAutoCommand("Test Auto", complexCommand);
+    telemetry.addAutoCommand("Simple Timed Auto", simpleTimedAuto);
     telemetry.initDashboard();
   }
 
