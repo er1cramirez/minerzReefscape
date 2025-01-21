@@ -1,22 +1,24 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class CoralGrabber extends SubsystemBase {
+public class AlgaeGrabber extends SubsystemBase {
     // Hardware
-    private final WPI_VictorSPX grabberMotor;
+    private final VictorSPX grabberMotor;
     
     // Constants
-    private static final int GRABBER_MOTOR_ID = 11; // Update this ID as needed
+    private static final int GRABBER_MOTOR_ID = 10; // Update this ID as needed
     private static final double GRAB_SPEED = 0.5;
     private static final double RELEASE_SPEED = -0.5;
     
-    public CoralGrabber() {
+    public AlgaeGrabber() {
         // Initialize hardware
-        grabberMotor = new WPI_VictorSPX(GRABBER_MOTOR_ID);
+        grabberMotor = new VictorSPX(GRABBER_MOTOR_ID);
         configureMotor();
     }
     
@@ -26,6 +28,7 @@ public class CoralGrabber extends SubsystemBase {
         grabberMotor.setInverted(false);
         grabberMotor.configVoltageCompSaturation(12.0);
         grabberMotor.enableVoltageCompensation(true);
+        grabberMotor.setNeutralMode(NeutralMode.Brake);
     }
     
     public void grab() {

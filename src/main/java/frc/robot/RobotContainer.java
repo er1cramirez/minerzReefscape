@@ -12,26 +12,37 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.ElevatorControlCommand;
+// import frc.robot.commands.ElevatorControlCommand;
+import frc.robot.commands.TeleopAlgaeGrabber;
+import frc.robot.commands.TeleopCoralArm;
 import frc.robot.commands.TeleopDrive;
-import frc.robot.commands.TeleopElevator;
-import frc.robot.commands.auto.ComplexAutoCommand;
-import frc.robot.subsystems.Elevator;
+import frc.robot.commands.TeleopSimpleElevator;
+// import frc.robot.commands.TeleopElevator;
+import frc.robot.commands.TeleopCoralGrabber;
+// import frc.robot.commands.auto.ComplexAutoCommand;
+import frc.robot.subsystems.AlgaeGrabber;
+import frc.robot.subsystems.CoralGrabber;
+import frc.robot.subsystems.CoralGrabberArm;
+import frc.robot.subsystems.SimpleElevator;
+// import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 import frc.robot.telemetry.RobotTelemetry;
-import frc.robot.util.ElevatorStates;
+// import frc.robot.util.ElevatorStates;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveDrivetrain swerve = new SwerveDrivetrain();
   // private final Elevator elevator = new Elevator();
-
+  private final SimpleElevator elevator = new SimpleElevator();
+  private final CoralGrabber coralGrabber = new CoralGrabber();
+  private final AlgaeGrabber algaeGrabber = new AlgaeGrabber();
+  private final CoralGrabberArm coralArm = new CoralGrabberArm();
   // Robot telemetry
   private final RobotTelemetry telemetry = new RobotTelemetry();
 
   // Controllers
   private final XboxController chassisController = new XboxController(0);
-  // private final XboxController mechanismController = new XboxController(1);
+  private final XboxController mechanismController = new XboxController(1);
   // Auto Commands
   private final Command complexCommand;
   public RobotContainer() {
@@ -60,7 +71,16 @@ public class RobotContainer {
       () -> -chassisController.getLeftX(), // Left/Right
       () -> chassisController.getRightX() // Rotation
     ));
-    
+    // Manual control
+    coralArm.setDefaultCommand(new TeleopCoralArm(
+      coralArm,
+      () -> mechanismController.getRightY()
+    ));
+    // Manual control(elevator simplified)
+    elevator.setDefaultCommand(new TeleopSimpleElevator(
+      elevator,
+      () -> (mechanismController.getRightTriggerAxis() - mechanismController.getLeftTriggerAxis())
+    ));
     // Manual control
     // elevator.setDefaultCommand(new TeleopElevator(
     //   elevator,
@@ -68,7 +88,18 @@ public class RobotContainer {
     // ));
   }
   private void configureBindings() {
-    // Configure button bindings
+    // Coral Grabber controls
+    new JoystickButton(mechanismController, XboxController.Button.kLeftBumper.value)
+        .whileTrue(new TeleopCoralGrabber(coralGrabber, true));  // Grab while held
+        
+    new JoystickButton(mechanismController, XboxController.Button.kRightBumper.value)
+        .whileTrue(new TeleopCoralGrabber(coralGrabber, false));  // Release while held
+    // Algae Grabber controls
+    new JoystickButton(mechanismController, XboxController.Button.kA.value)
+        .whileTrue(new TeleopAlgaeGrabber(algaeGrabber, true));  // Grab while held
+
+    new JoystickButton(mechanismController, XboxController.Button.kB.value)
+        .whileTrue(new TeleopAlgaeGrabber(algaeGrabber, false));  // Release while held
 
     // Field relative drive
     new JoystickButton(chassisController, XboxController.Button.kB.value)
@@ -90,6 +121,7 @@ public class RobotContainer {
 
     // new JoystickButton(mechanismController, XboxController.Button.kB.value)
     //   .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L2));
+
 
   }
 
