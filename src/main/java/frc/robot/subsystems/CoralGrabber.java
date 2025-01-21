@@ -1,13 +1,14 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+// import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralGrabber extends SubsystemBase {
     // Hardware
-    private final WPI_VictorSPX grabberMotor;
+    private final VictorSPX grabberMotor;
     
     // Constants
     private static final int GRABBER_MOTOR_ID = 11; // Update this ID as needed
@@ -16,7 +17,7 @@ public class CoralGrabber extends SubsystemBase {
     
     public CoralGrabber() {
         // Initialize hardware
-        grabberMotor = new WPI_VictorSPX(GRABBER_MOTOR_ID);
+        grabberMotor = new VictorSPX(GRABBER_MOTOR_ID);
         configureMotor();
     }
     
