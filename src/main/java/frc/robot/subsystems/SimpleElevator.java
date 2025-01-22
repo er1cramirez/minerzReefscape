@@ -45,7 +45,7 @@ public class SimpleElevator extends SubsystemBase {
 
     private void configureMotor() {
         SparkMaxConfig config = new SparkMaxConfig();
-        config.inverted(false);
+        config.inverted(true);
         config.smartCurrentLimit(CURRENT_LIMIT);
         config.voltageCompensation(12.0);
         config.idleMode(IdleMode.kBrake);

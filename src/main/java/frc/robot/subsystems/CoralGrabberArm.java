@@ -15,6 +15,7 @@ public class CoralGrabberArm extends SubsystemBase {
     // Constants
     private static final int ARM_MOTOR_ID = 12;
     private static final double SLEW_RATE_LIMIT = 0.5; // units per second
+    private static final double ARM_MAX_SPEED = 0.5;
     
     public CoralGrabberArm() {
         // Initialize hardware
@@ -33,7 +34,7 @@ public class CoralGrabberArm extends SubsystemBase {
     
     // Simple joystick control methods
     public void setSpeed(double speed) {
-        double filteredSpeed = rateLimiter.calculate(speed);
+        double filteredSpeed = rateLimiter.calculate(speed) * ARM_MAX_SPEED;
         armMotor.set(ControlMode.PercentOutput, filteredSpeed);
     }
     

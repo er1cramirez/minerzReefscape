@@ -15,6 +15,7 @@ public class AlgaeGrabberArm extends SubsystemBase {
     // Constants
     private static final int ARM_MOTOR_ID = 13;
     private static final double SLEW_RATE_LIMIT = 1.0; // units per second
+    private static final double ARM_MAX_SPEED = 0.5;
     
     public AlgaeGrabberArm() {
         // Initialize hardware
@@ -33,7 +34,7 @@ public class AlgaeGrabberArm extends SubsystemBase {
     
     // Simple joystick control methods
     public void setSpeed(double speed) {
-        double filteredSpeed = rateLimiter.calculate(speed);
+        double filteredSpeed = rateLimiter.calculate(speed) * ARM_MAX_SPEED;
         armMotor.set(ControlMode.PercentOutput, filteredSpeed);
     }
     
