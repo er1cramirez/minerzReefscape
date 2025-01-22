@@ -23,7 +23,7 @@ public class SimpleElevator extends SubsystemBase {
     private final Debouncer topDebouncer;
 
     // Constants
-    private static final int MOTOR_ID = 1;
+    private static final int MOTOR_ID = 9;
     private static final int BOTTOM_SWITCH_PORT = 0;
     private static final int TOP_SWITCH_PORT = 1;
     private static final int CURRENT_LIMIT = 30;
@@ -53,16 +53,16 @@ public class SimpleElevator extends SubsystemBase {
     }
 
     private boolean isSafeToMove(double speed) {
-        // Get debounced limit switch readings
-        boolean bottomTriggered = bottomDebouncer.calculate(bottomLimitSwitch.get());
-        boolean topTriggered = topDebouncer.calculate(topLimitSwitch.get());
+        // // Get debounced limit switch readings
+        // boolean bottomTriggered = bottomDebouncer.calculate(bottomLimitSwitch.get());
+        // boolean topTriggered = topDebouncer.calculate(topLimitSwitch.get());
 
-        if (bottomTriggered && speed < 0) {
-            return false;
-        }
-        if (topTriggered && speed > 0) {
-            return false;
-        }
+        // if (bottomTriggered && speed < 0) {
+        //     return false;
+        // }
+        // if (topTriggered && speed > 0) {
+        //     return false;
+        // }
         return true;
     }
 

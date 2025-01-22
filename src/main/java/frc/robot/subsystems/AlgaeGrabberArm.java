@@ -6,17 +6,17 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class CoralGrabberArm extends SubsystemBase {
+public class AlgaeGrabberArm extends SubsystemBase {
     // Hardware
     private final VictorSPX armMotor;
     // Control objects
     private final SlewRateLimiter rateLimiter;
     
     // Constants
-    private static final int ARM_MOTOR_ID = 12;
-    private static final double SLEW_RATE_LIMIT = 0.5; // units per second
+    private static final int ARM_MOTOR_ID = 13;
+    private static final double SLEW_RATE_LIMIT = 1.0; // units per second
     
-    public CoralGrabberArm() {
+    public AlgaeGrabberArm() {
         // Initialize hardware
         armMotor = new VictorSPX(ARM_MOTOR_ID);
         // Initialize controllers

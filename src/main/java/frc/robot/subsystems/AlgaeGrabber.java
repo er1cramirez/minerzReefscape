@@ -12,7 +12,7 @@ public class AlgaeGrabber extends SubsystemBase {
     private final VictorSPX grabberMotor;
     
     // Constants
-    private static final int GRABBER_MOTOR_ID = 10; // Update this ID as needed
+    private static final int GRABBER_MOTOR_ID = 14; // Update this ID as needed
     private static final double GRAB_SPEED = 0.5;
     private static final double RELEASE_SPEED = -0.5;
     

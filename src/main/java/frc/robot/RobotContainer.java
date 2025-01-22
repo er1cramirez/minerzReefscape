@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 // import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.TeleopAlgaeArm;
 // import frc.robot.commands.ElevatorControlCommand;
 import frc.robot.commands.TeleopAlgaeGrabber;
 import frc.robot.commands.TeleopCoralArm;
@@ -22,6 +23,7 @@ import frc.robot.commands.auto.TimedAutoExample;
 import frc.robot.commands.TeleopCoralGrabber;
 // import frc.robot.commands.auto.ComplexAutoCommand;
 import frc.robot.subsystems.AlgaeGrabber;
+import frc.robot.subsystems.AlgaeGrabberArm;
 import frc.robot.subsystems.CoralGrabber;
 import frc.robot.subsystems.CoralGrabberArm;
 import frc.robot.subsystems.SimpleElevator;
@@ -38,6 +40,7 @@ public class RobotContainer {
   private final CoralGrabber coralGrabber = new CoralGrabber();
   private final AlgaeGrabber algaeGrabber = new AlgaeGrabber();
   private final CoralGrabberArm coralArm = new CoralGrabberArm();
+  private final AlgaeGrabberArm algaeArm = new AlgaeGrabberArm();
   // Robot telemetry
   private final RobotTelemetry telemetry = new RobotTelemetry();
 
@@ -85,6 +88,11 @@ public class RobotContainer {
     coralArm.setDefaultCommand(new TeleopCoralArm(
       coralArm,
       () -> mechanismController.getRightY()
+    ));
+    // Algae Arm manual control
+    algaeArm.setDefaultCommand(new TeleopAlgaeArm(
+      algaeArm,
+      () -> mechanismController.getLeftY()
     ));
     // Manual control(elevator simplified)
     elevator.setDefaultCommand(new TeleopSimpleElevator(

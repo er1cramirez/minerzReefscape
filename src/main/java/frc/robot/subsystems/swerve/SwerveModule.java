@@ -60,7 +60,7 @@ public class SwerveModule extends SubsystemBase{
             steeringMotor = new SparkMax(moduleConstants.steeringMotorID(), MotorType.kBrushless);
             drivingEncoder = drivingMotor.getEncoder();
             steeringEncoder = steeringMotor.getEncoder();
-            steerAbsoluteEncoder = new CANcoder(moduleConstants.steerAbsoluteEncoderID());
+            steerAbsoluteEncoder = new CANcoder(moduleConstants.steerAbsoluteEncoderID(),"can_fd");
 
             // Initialize controllers
             drivingController = drivingMotor.getClosedLoopController();
@@ -71,8 +71,14 @@ public class SwerveModule extends SubsystemBase{
             steeringMotorInit();
 
             // Initialize state variables
-            currentState = new SwerveModuleState(0, getModuleSteer());
-            targetState = currentState;
+            currentState = new SwerveModuleState(
+                getDriveVelocity(),
+                getSteerAngle()
+            );
+            targetState = new SwerveModuleState(
+                currentState.speedMetersPerSecond,
+                currentState.angle
+            );
         } catch (Exception e){
             throw new RuntimeException("Module " + moduleConstants.moduleNumber() + " failed to initialize", e);
         }
@@ -80,19 +86,30 @@ public class SwerveModule extends SubsystemBase{
     }
 
     public void setDesiredState(SwerveModuleState desiredState){
-        targetState = desiredState;
+        // Update current state before optimization
         updateCurrentState();
-        // Optimize the reference state to avoid spinning the module 180 degrees
-        desiredState.optimize(currentState.angle);
-        // Cosine scaling for the driving motor
-        desiredState.cosineScale(currentState.angle);
 
+        // Create mutable copy of desired state
+        SwerveModuleState optimizedState = new SwerveModuleState(
+            desiredState.speedMetersPerSecond,
+            desiredState.angle
+        );
+
+        // Optimize the reference state to avoid spinning further than 90 degrees
+        optimizedState.optimize(currentState.angle);
+
+        // Update target state after optimization
+        targetState = desiredState;
+
+        // Apply speed scaling based on angle difference
+        optimizedState.cosineScale(currentState.angle);
+        // Set motor references
         drivingController.setReference(
-            desiredState.speedMetersPerSecond, 
+            optimizedState.speedMetersPerSecond,
             ControlType.kVelocity
         );
         steeringController.setReference(
-            desiredState.angle.getRadians(), 
+            optimizedState.angle.getRadians(),
             ControlType.kPosition
         );
     }
@@ -144,17 +161,19 @@ public class SwerveModule extends SubsystemBase{
     // State methods
 
     private void updateCurrentState() {
-        double velocity = drivingEncoder.getVelocity();
-        currentState = new SwerveModuleState(velocity, getModuleSteer());
+        currentState = new SwerveModuleState(
+            getDriveVelocity(),
+            getSteerAngle()
+        );
     }
 
 
-    private double getModuleSpeed(){
+    private double getDriveVelocity(){
         return drivingEncoder.getVelocity();
     }
 
-    private Rotation2d getModuleSteer(){
-        return new Rotation2d(steeringEncoder.getPosition());
+    private Rotation2d getSteerAngle(){
+        return Rotation2d.fromRadians(steeringEncoder.getPosition());
     }
 
     private Rotation2d getAbsoluteSteer(){
@@ -179,7 +198,7 @@ public class SwerveModule extends SubsystemBase{
     } 
 
     private void checkRunningState() {
-        if (Math.abs(getModuleSpeed()) < Constants.SwerveConstants.speedDeadband) {
+        if (Math.abs(getDriveVelocity()) < Constants.SwerveConstants.speedDeadband) {
             operationState = SwerveModuleOperationState.IDLE;
         } else {
             operationState = SwerveModuleOperationState.RUNNING;
@@ -231,7 +250,7 @@ public class SwerveModule extends SubsystemBase{
     public SwerveModulePosition getModulePosition() {
         return new SwerveModulePosition(
             drivingEncoder.getPosition(),
-            getModuleSteer());
+            getSteerAngle());
     }
 
     /**
