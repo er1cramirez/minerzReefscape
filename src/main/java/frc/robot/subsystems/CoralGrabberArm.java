@@ -2,26 +2,20 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CoralConstants;
 
 public class CoralGrabberArm extends SubsystemBase {
     // Hardware
     private final VictorSPX armMotor;
-    // Control objects
-    private final SlewRateLimiter rateLimiter;
     
     // Constants
-    private static final int ARM_MOTOR_ID = 12;
-    private static final double SLEW_RATE_LIMIT = 0.5; // units per second
-    private static final double ARM_MAX_SPEED = 0.5;
+    
     
     public CoralGrabberArm() {
         // Initialize hardware
-        armMotor = new VictorSPX(ARM_MOTOR_ID);
-        // Initialize controllers
-        rateLimiter = new SlewRateLimiter(SLEW_RATE_LIMIT);
+        armMotor = new VictorSPX(CoralConstants.ARM_MOTOR_ID);
         configureMotor();
     }
     
@@ -34,8 +28,7 @@ public class CoralGrabberArm extends SubsystemBase {
     
     // Simple joystick control methods
     public void setSpeed(double speed) {
-        double filteredSpeed = rateLimiter.calculate(speed) * ARM_MAX_SPEED;
-        armMotor.set(ControlMode.PercentOutput, filteredSpeed);
+        armMotor.set(ControlMode.PercentOutput, speed);
     }
     
     public void stop() {

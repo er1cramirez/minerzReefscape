@@ -15,7 +15,7 @@ public class Constants {
         public static final int chassisControllerPort = 0;
         public static final int operatorControllerPort = 1;
         public static final double chassisControllerDeadband = 0.05;
-        public static final double operatorControllerDeadband = 0.05;
+        public static final double mechanismControllerDeadband = 0.05;
     }
 
     public static class SwerveConstants {
@@ -127,7 +127,34 @@ public class Constants {
         public static final PIDConstants elevatorPID = new PIDConstants(
             0.4, 0, 0.01, 0, 0, 1, -1);
     }
+    public static final class ClimberConstants {
+        public static final double SLEW_RATE = 2.0;
+        public static final double MAX_SPEED = 0.8;
+    }
+    
+    public static final class SimpleElevatorConstants {
+        public static final double SLEW_RATE = 1.5;
+        public static final double MAX_SPEED = 1.5;
+        public static final int MOTOR_ID = 9;
+        public static final int BOTTOM_SWITCH_PORT = 0;
+        public static final int TOP_SWITCH_PORT = 1;
+        public static final int CURRENT_LIMIT = 30;
+        public static final double DEBOUNCE_TIME = 0.03; // 30ms debounce
+    }
 
+    public static final class CoralConstants {
+        public static final int GRABBER_MOTOR_ID = 11; // Update this ID as needed
+        public static final int ARM_MOTOR_ID = 12;
+        public static final double SLEW_RATE = 1.5;
+        public static final double MAX_SPEED = 0.5;
+    }
+
+    public static final class AlgaeConstants {
+        public static final int GRABBER_MOTOR_ID = 14; // Update this ID as needed
+        public static final int ARM_MOTOR_ID = 13;
+        public static final double SLEW_RATE = 4.0;
+        public static final double MAX_SPEED = 1.0;
+    }
     public static final class AutoConstants {
         public static final double kPXController = 1;
         public static final double kPYController = 1;

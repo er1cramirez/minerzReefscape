@@ -153,7 +153,7 @@ public class SwerveModule extends SubsystemBase{
         steeringConfig.closedLoop.positionWrappingEnabled(true);
         steeringConfig.closedLoop.positionWrappingInputRange(-Math.PI, Math.PI);
 
-        steeringMotor.configure(steeringConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        steeringMotor.configure(steeringConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         resetSteeringEncoderToAbsolute();
     }
 
@@ -178,7 +178,7 @@ public class SwerveModule extends SubsystemBase{
 
     private Rotation2d getAbsoluteSteer(){
         return Rotation2d.fromRotations(
-            steerAbsoluteEncoder.getAbsolutePosition().getValueAsDouble()).minus(moduleConstants.steerAngleOffset());
+            steerAbsoluteEncoder.getAbsolutePosition().getValue().magnitude()).minus(moduleConstants.steerAngleOffset());
     }
 
     /**
@@ -189,6 +189,7 @@ public class SwerveModule extends SubsystemBase{
         operationState = SwerveModuleOperationState.CALIBRATING; // Add state tracking
         try {
             Rotation2d position = getAbsoluteSteer();
+            System.out.println("steer encoder reset");
             steeringEncoder.setPosition(position.getRadians());
             operationState = SwerveModuleOperationState.CALIBRATED;
         } catch (Exception e) {
@@ -211,7 +212,7 @@ public class SwerveModule extends SubsystemBase{
         if (operationState == SwerveModuleOperationState.CALIBRATED) {
             try {
                 // Get the absolute difference between angles
-                double angleDifference = Math.abs(getAbsoluteSteer().minus(getAbsoluteSteer()).getRadians()
+                double angleDifference = Math.abs(currentState.angle.minus(getAbsoluteSteer()).getRadians()
                 );
                 // Check if difference exceeds tolerance
                 if (angleDifference > Constants.SwerveConstants.steeringErrorTolerance) {

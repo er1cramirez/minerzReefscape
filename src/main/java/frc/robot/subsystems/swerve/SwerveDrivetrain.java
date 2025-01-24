@@ -39,7 +39,7 @@ public class SwerveDrivetrain extends SubsystemBase{
     
     // State
     // private ChassisSpeeds currentSpeeds = new ChassisSpeeds();
-    private boolean isFieldRelative = true;
+    private boolean isFieldRelative = false;
 
     /**
      * Constructs a SwerveDrivetrain object.
@@ -52,7 +52,7 @@ public class SwerveDrivetrain extends SubsystemBase{
             new SwerveModule(Constants.SwerveConstants.backLeftModuleConstants),
             new SwerveModule(Constants.SwerveConstants.backRightModuleConstants)
         };
-        gyro = new AHRS(/*USB */AHRS.NavXComType.kUSB1);
+        gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
         
         // Initialize kinematics and odometry
         kinematics = Constants.SwerveConstants.kinematics;

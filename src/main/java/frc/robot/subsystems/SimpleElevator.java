@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import frc.robot.Constants;
+import frc.robot.Constants.SimpleElevatorConstants;
 
 public class SimpleElevator extends SubsystemBase {
     // Hardware
@@ -23,30 +23,26 @@ public class SimpleElevator extends SubsystemBase {
     private final Debouncer topDebouncer;
 
     // Constants
-    private static final int MOTOR_ID = 9;
-    private static final int BOTTOM_SWITCH_PORT = 0;
-    private static final int TOP_SWITCH_PORT = 1;
-    private static final int CURRENT_LIMIT = 30;
-    private static final double DEBOUNCE_TIME = 0.03; // 30ms debounce
+    
 
     public SimpleElevator() {
         // Initialize motor
-        motor = new SparkMax(MOTOR_ID, MotorType.kBrushed);
+        motor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushed);
         configureMotor();
 
         // Initialize limit switches
-        bottomLimitSwitch = new DigitalInput(BOTTOM_SWITCH_PORT);
-        topLimitSwitch = new DigitalInput(TOP_SWITCH_PORT);
+        bottomLimitSwitch = new DigitalInput(SimpleElevatorConstants.BOTTOM_SWITCH_PORT);
+        topLimitSwitch = new DigitalInput(SimpleElevatorConstants.TOP_SWITCH_PORT);
         
         // Initialize debouncers in both rising and falling edges
-        bottomDebouncer = new Debouncer(DEBOUNCE_TIME, DebounceType.kBoth);
-        topDebouncer = new Debouncer(DEBOUNCE_TIME, DebounceType.kBoth);
+        bottomDebouncer = new Debouncer(SimpleElevatorConstants.DEBOUNCE_TIME, DebounceType.kBoth);
+        topDebouncer = new Debouncer(SimpleElevatorConstants.DEBOUNCE_TIME, DebounceType.kBoth);
     }
 
     private void configureMotor() {
         SparkMaxConfig config = new SparkMaxConfig();
         config.inverted(true);
-        config.smartCurrentLimit(CURRENT_LIMIT);
+        config.smartCurrentLimit(SimpleElevatorConstants.CURRENT_LIMIT);
         config.voltageCompensation(12.0);
         config.idleMode(IdleMode.kBrake);
         motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);

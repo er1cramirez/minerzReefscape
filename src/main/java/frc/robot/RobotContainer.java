@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopAlgaeArm;
 // import frc.robot.commands.ElevatorControlCommand;
 import frc.robot.commands.TeleopAlgaeGrabber;
+import frc.robot.commands.TeleopClimber;
 import frc.robot.commands.TeleopCoralArm;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.TeleopSimpleElevator;
@@ -24,8 +25,11 @@ import frc.robot.commands.TeleopCoralGrabber;
 // import frc.robot.commands.auto.ComplexAutoCommand;
 import frc.robot.subsystems.AlgaeGrabber;
 import frc.robot.subsystems.AlgaeGrabberArm;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CoralGrabber;
 import frc.robot.subsystems.CoralGrabberArm;
+import frc.robot.subsystems.LedStripe;
+import frc.robot.subsystems.LedStripe.LedState;
 import frc.robot.subsystems.SimpleElevator;
 // import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
@@ -41,8 +45,10 @@ public class RobotContainer {
   private final AlgaeGrabber algaeGrabber = new AlgaeGrabber();
   private final CoralGrabberArm coralArm = new CoralGrabberArm();
   private final AlgaeGrabberArm algaeArm = new AlgaeGrabberArm();
+  private final Climber climber = new Climber();
   // Robot telemetry
   private final RobotTelemetry telemetry = new RobotTelemetry();
+  private final LedStripe ledStripe = new LedStripe();
 
   // Controllers
   private final XboxController chassisController = new XboxController(0);
@@ -80,8 +86,8 @@ public class RobotContainer {
   private void configureCommands() {
     swerve.setDefaultCommand(new TeleopDrive(
       swerve,
-      () -> -chassisController.getLeftY(), // Forward/Backward
-      () -> -chassisController.getLeftX(), // Left/Right
+      () -> chassisController.getLeftY(), // Forward/Backward
+      () -> chassisController.getLeftX(), // Left/Right
       () -> chassisController.getRightX() // Rotation
     ));
     // Manual control
@@ -104,14 +110,23 @@ public class RobotContainer {
     //   elevator,
     //   () -> (mechanismController.getRightTriggerAxis() - mechanismController.getLeftTriggerAxis())
     // ));
+    
+    climber.setDefaultCommand(new TeleopClimber(
+        climber,
+        () -> (chassisController.getRightTriggerAxis() - chassisController.getLeftTriggerAxis())  // Or preferred control input
+    ));
   }
   private void configureBindings() {
     // Coral Grabber controls
     new JoystickButton(mechanismController, XboxController.Button.kLeftBumper.value)
-        .whileTrue(new TeleopCoralGrabber(coralGrabber, true));  // Grab while held
+        .whileTrue(new TeleopCoralGrabber(coralGrabber, true))  // Grab while held
+        .onTrue(new InstantCommand(() -> ledStripe.setState(LedState.COLLECTING)))
+        .onFalse(new InstantCommand(() -> ledStripe.setState(LedState.ENABLED)));
         
     new JoystickButton(mechanismController, XboxController.Button.kRightBumper.value)
-        .whileTrue(new TeleopCoralGrabber(coralGrabber, false));  // Release while held
+        .whileTrue(new TeleopCoralGrabber(coralGrabber, false))  // Release while held
+        .onTrue(new InstantCommand(() -> ledStripe.setState(LedState.SCORING)))
+        .onFalse(new InstantCommand(() -> ledStripe.setState(LedState.ENABLED)));
     // Algae Grabber controls
     new JoystickButton(mechanismController, XboxController.Button.kA.value)
         .whileTrue(new TeleopAlgaeGrabber(algaeGrabber, true));  // Grab while held
