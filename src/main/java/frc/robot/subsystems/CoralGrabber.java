@@ -5,19 +5,19 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 // import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.CoralConstants;
 
 public class CoralGrabber extends SubsystemBase {
     // Hardware
     private final VictorSPX grabberMotor;
     
     // Constants
-    private static final int GRABBER_MOTOR_ID = 11; // Update this ID as needed
     private static final double GRAB_SPEED = 0.5;
     private static final double RELEASE_SPEED = -0.5;
     
     public CoralGrabber() {
         // Initialize hardware
-        grabberMotor = new VictorSPX(GRABBER_MOTOR_ID);
+        grabberMotor = new VictorSPX(CoralConstants.GRABBER_MOTOR_ID);
         configureMotor();
     }
     

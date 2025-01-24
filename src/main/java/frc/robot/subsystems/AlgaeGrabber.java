@@ -6,19 +6,19 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AlgaeConstants;
 
 public class AlgaeGrabber extends SubsystemBase {
     // Hardware
     private final VictorSPX grabberMotor;
     
     // Constants
-    private static final int GRABBER_MOTOR_ID = 14; // Update this ID as needed
-    private static final double GRAB_SPEED = 0.5;
-    private static final double RELEASE_SPEED = -0.5;
+    private static final double GRAB_SPEED = 1;
+    private static final double RELEASE_SPEED = -1;
     
     public AlgaeGrabber() {
         // Initialize hardware
-        grabberMotor = new VictorSPX(GRABBER_MOTOR_ID);
+        grabberMotor = new VictorSPX(AlgaeConstants.GRABBER_MOTOR_ID);
         configureMotor();
     }
     

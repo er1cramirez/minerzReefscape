@@ -3,49 +3,40 @@ package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.AlgaeConstants;
+import frc.robot.Constants.ClimberConstants;
 import frc.robot.Constants.ControllersConstants;
-import frc.robot.subsystems.AlgaeGrabberArm;
-// import frc.robot.subsystems.CoralGrabberArm;
+import frc.robot.subsystems.Climber;
 import frc.robot.util.InputProcessor;
 
-public class TeleopAlgaeArm extends Command {
-    private final AlgaeGrabberArm arm;
+public class TeleopClimber extends Command {
+    private final Climber climber;
     private final DoubleSupplier speedSupplier;
     private final SlewRateLimiter speedLimiter;
     
-    public TeleopAlgaeArm(AlgaeGrabberArm arm, DoubleSupplier speedSupplier) {
-        this.arm = arm;
+
+    
+    public TeleopClimber(Climber climber, DoubleSupplier speedSupplier) {
+        this.climber = climber;
         this.speedSupplier = speedSupplier;
         this.speedLimiter = new SlewRateLimiter(
-            AlgaeConstants.SLEW_RATE
+            ClimberConstants.SLEW_RATE
         );
-        addRequirements(arm);
-    }
-    
-    @Override
-    public void initialize() {
-        // arm.disablePositionControl();
+        addRequirements(climber);
     }
     
     @Override
     public void execute() {
         double speed = InputProcessor.processInput(
             speedSupplier.getAsDouble(),
-            ControllersConstants.mechanismControllerDeadband,
+            ControllersConstants.chassisControllerDeadband,
             speedLimiter,
-            AlgaeConstants.MAX_SPEED
+            ClimberConstants.MAX_SPEED
         );
-        arm.setSpeed(speed);
+        climber.setSpeed(speed);
     }
     
     @Override
     public void end(boolean interrupted) {
-        arm.stop();
-    }
-    
-    @Override
-    public boolean isFinished() {
-        return false;
+        climber.stop();
     }
 }

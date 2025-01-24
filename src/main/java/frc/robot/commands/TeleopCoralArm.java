@@ -1,18 +1,25 @@
 package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
-import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.ControllersConstants;
+import frc.robot.Constants.CoralConstants;
 import frc.robot.subsystems.CoralGrabberArm;
+import frc.robot.util.InputProcessor;
 
 public class TeleopCoralArm extends Command {
     private final CoralGrabberArm arm;
     private final DoubleSupplier speedSupplier;
-    private static final double DEADBAND = 0.1;
+    private final SlewRateLimiter speedLimiter;
+
     
     public TeleopCoralArm(CoralGrabberArm arm, DoubleSupplier speedSupplier) {
         this.arm = arm;
         this.speedSupplier = speedSupplier;
+        this.speedLimiter = new SlewRateLimiter(
+            CoralConstants.SLEW_RATE
+        );
         addRequirements(arm);
     }
     
@@ -23,7 +30,12 @@ public class TeleopCoralArm extends Command {
     
     @Override
     public void execute() {
-        double speed = MathUtil.applyDeadband(speedSupplier.getAsDouble(), DEADBAND);
+        double speed = InputProcessor.processInput(
+            speedSupplier.getAsDouble(),
+            ControllersConstants.mechanismControllerDeadband,
+            speedLimiter,
+            CoralConstants.MAX_SPEED
+        );
         arm.setSpeed(speed);
     }
     

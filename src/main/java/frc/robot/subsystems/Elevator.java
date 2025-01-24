@@ -61,7 +61,7 @@ public class Elevator extends SubsystemBase {
         config.closedLoop.d(Constants.ElevatorConstants.elevatorPID.kD());
         config.closedLoop.minOutput(Constants.ElevatorConstants.elevatorPID.kMinOutput());
         config.closedLoop.maxOutput(Constants.ElevatorConstants.elevatorPID.kMaxOutput());
-        mainMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        mainMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         // encoder reset
         mainEncoder.setPosition(0);
         // Configure the motors
