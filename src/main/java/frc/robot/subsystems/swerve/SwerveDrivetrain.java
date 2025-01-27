@@ -176,6 +176,7 @@ public class SwerveDrivetrain extends SubsystemBase{
             allCalibrated &= swerveModules[i].calibrateSteering();
         }
         if(allCalibrated){
+            System.out.println("steer encoder reset done");
             // Logger.getInstance().recordOutput("Calibration/Steering", true);
         }
     }

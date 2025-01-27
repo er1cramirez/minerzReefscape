@@ -177,6 +177,7 @@ public class SwerveModule extends SubsystemBase{
     }
 
     private Rotation2d getAbsoluteSteer(){
+        // return new Rotation2d(steerAbsoluteEncoder.getAbsolutePosition().getValue());
         return Rotation2d.fromRotations(
             steerAbsoluteEncoder.getAbsolutePosition().getValue().magnitude()).minus(moduleConstants.steerAngleOffset());
     }
@@ -189,7 +190,6 @@ public class SwerveModule extends SubsystemBase{
         operationState = SwerveModuleOperationState.CALIBRATING; // Add state tracking
         try {
             Rotation2d position = getAbsoluteSteer();
-            System.out.println("steer encoder reset");
             steeringEncoder.setPosition(position.getRadians());
             operationState = SwerveModuleOperationState.CALIBRATED;
         } catch (Exception e) {

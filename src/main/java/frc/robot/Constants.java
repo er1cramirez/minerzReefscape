@@ -133,8 +133,8 @@ public class Constants {
     }
     
     public static final class SimpleElevatorConstants {
-        public static final double SLEW_RATE = 1.5;
-        public static final double MAX_SPEED = 1.5;
+        public static final double SLEW_RATE = 5.5;
+        public static final double MAX_SPEED = 1.0;
         public static final int MOTOR_ID = 9;
         public static final int BOTTOM_SWITCH_PORT = 0;
         public static final int TOP_SWITCH_PORT = 1;
@@ -145,7 +145,7 @@ public class Constants {
     public static final class CoralConstants {
         public static final int GRABBER_MOTOR_ID = 11; // Update this ID as needed
         public static final int ARM_MOTOR_ID = 12;
-        public static final double SLEW_RATE = 1.5;
+        public static final double SLEW_RATE = 7.5;
         public static final double MAX_SPEED = 0.5;
     }
 

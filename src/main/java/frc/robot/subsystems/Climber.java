@@ -15,8 +15,8 @@ public class Climber extends SubsystemBase {
     private final SparkMax followerMotor;
     
     // Constants
-    private static final int MASTER_MOTOR_ID = 15;
-    private static final int FOLLOWER_MOTOR_ID = 16;
+    private static final int MASTER_MOTOR_ID = 10;
+    private static final int FOLLOWER_MOTOR_ID = 15;
     private static final int CURRENT_LIMIT = 40;
 
     
