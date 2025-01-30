@@ -80,7 +80,7 @@ public class SwerveDrivetrain extends SubsystemBase{
         if (isFieldRelative) {
             speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRobotHeading());
         }
-        
+        // speeds = ChassisSpeeds.fromRobotRelativeSpeeds(speeds, getRobotHeading());
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         setModuleStates(states);
         // currentSpeeds = speeds;
@@ -104,11 +104,18 @@ public class SwerveDrivetrain extends SubsystemBase{
     // get Yaw from gyro
     public Rotation2d getRobotHeading(){
         // CCW is positive
-        return Rotation2d.fromDegrees(gyro.getFusedHeading());
+        // return Rotation2d.fromDegrees(gyro.getFusedHeading());
+        return new Rotation2d();
     }
 
     // Reset the robot heading(yaw)
     private void resetRobotHeading(boolean isRedAlliance){
+        // Reset the gyro with the appropriate offset based on alliance
+        if (isRedAlliance) {
+            gyro.reset();
+        } else {
+            gyro.reset();
+        }
         // Reset the gyro
     } 
 

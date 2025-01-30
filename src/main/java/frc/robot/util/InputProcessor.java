@@ -23,4 +23,11 @@ public class InputProcessor {
     public static double processInput(double input, double deadband, double maxSpeed) {
         return MathUtil.applyDeadband(input, deadband) * maxSpeed;
     }
+
+    /**
+     * Overloaded method for cases with slew rate and starting speed
+     */
+    public static double processInput(double input, double deadband, SlewRateLimiter limiter, double maxSpeed, double startingSpeed) {
+        return limiter.calculate(MathUtil.applyDeadband(input, deadband)) * maxSpeed + (startingSpeed *(input/input));
+    }
 }
