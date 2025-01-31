@@ -58,7 +58,7 @@ public class SwerveDrivetrain extends SubsystemBase{
         
         // Initialize kinematics and odometry
         kinematics = Constants.SwerveConstants.kinematics;
-        resetRobotHeading(true);
+        resetRobotHeading();
         // Initialize odometry with initial position
         this.odometry = new SwerveDriveOdometry(
             kinematics,
@@ -106,19 +106,17 @@ public class SwerveDrivetrain extends SubsystemBase{
     // get Yaw from gyro
     public Rotation2d getRobotHeading(){
         // CCW is positive
-        // return Rotation2d.fromDegrees(gyro.getFusedHeading());
-        return new Rotation2d();
+
+        return Rotation2d.fromDegrees(
+            gyro.getFusedHeading()).plus(
+                SwerveConstants.kGyroReversed ? Rotation2d.fromDegrees(180) : Rotation2d.fromDegrees(0));
+        // return new Rotation2d();
     }
 
     // Reset the robot heading(yaw)
-    private void resetRobotHeading(boolean isRedAlliance){
+    private void resetRobotHeading(){
         // Reset the gyro with the appropriate offset based on alliance
-        if (isRedAlliance) {
-            gyro.reset();
-        } else {
-            gyro.reset();
-        }
-        // Reset the gyro
+        gyro.reset();
     } 
 
     
