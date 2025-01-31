@@ -120,7 +120,7 @@ public class TimedAutoExample extends SequentialCommandGroup {
                         () -> coralArm.stop(),
                         coralArm
                     )
-                ).withTimeout(0.6)
+                ).withTimeout(0.8)
             )
         );
     }

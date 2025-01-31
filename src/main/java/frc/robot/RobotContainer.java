@@ -35,6 +35,7 @@ import frc.robot.subsystems.SimpleElevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 import frc.robot.telemetry.RobotTelemetry;
 // import frc.robot.util.ElevatorStates;
+import frc.robot.util.DriveMode;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
@@ -147,6 +148,11 @@ public class RobotContainer {
       .onTrue(new InstantCommand(
         () -> swerve.calibrateSteeringEncoders()
       ));
+
+    // Precision mode toggle
+    new JoystickButton(chassisController, XboxController.Button.kRightBumper.value)
+        .onTrue(new InstantCommand(() -> swerve.setDriveMode(DriveMode.PRECISION)))
+        .onFalse(new InstantCommand(() -> swerve.setDriveMode(DriveMode.NORMAL)));
 
     // Preset positions
     // new JoystickButton(mechanismController, XboxController.Button.kA.value)

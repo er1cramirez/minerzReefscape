@@ -52,31 +52,48 @@ public class TeleopDrive extends Command{
     }
     @Override
     public void execute() {
-        // Process inputs
+        // Get speed multiplier based on drive mode
+        double speedMultiplier = 1.0;
+        switch (swerve.getDriveMode()) {
+            case PRECISION:
+                speedMultiplier = Constants.SwerveConstants.precisionModeSpeedMultiplier;
+                break;
+            case TURBO:
+                speedMultiplier = Constants.SwerveConstants.turboModeSpeedMultiplier;
+                break;
+            default:
+                speedMultiplier = 1.0;
+        }
+
+        // Process inputs with speed multiplier
         double xSpeed = InputProcessor.processInput(
             translationXSupplier.getAsDouble(), 
             Constants.ControllersConstants.chassisControllerDeadband, 
-            xLimiter, Constants.SwerveConstants.maxSpeed);
+            xLimiter, 
+            Constants.SwerveConstants.maxSpeed * speedMultiplier);
         double ySpeed = InputProcessor.processInput(
             translationYSupplier.getAsDouble(), 
             Constants.ControllersConstants.chassisControllerDeadband, 
-            yLimiter, Constants.SwerveConstants.maxSpeed);
+            yLimiter, 
+            Constants.SwerveConstants.maxSpeed * speedMultiplier);
         double rot = InputProcessor.processInput(
             rotationSupplier.getAsDouble(), 
             Constants.ControllersConstants.chassisControllerDeadband, 
-            rotLimiter, Constants.SwerveConstants.maxSpeed);
+            rotLimiter, 
+            Constants.SwerveConstants.maxAngularSpeed * speedMultiplier);
 
         // Calculate chassis speeds
-        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            xSpeed, ySpeed, rot, swerve.getRobotHeading());
+        ChassisSpeeds speeds = swerve.isFieldRelative() 
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, swerve.getRobotHeading())
+            : new ChassisSpeeds(xSpeed, ySpeed, rot);
 
         // Drive the swerve drive
-        swerve.drive(speeds, swerve.isFieldRelative());
+        swerve.drive(speeds);
     }
 
     @Override
     public void end(boolean interrupted) {
-        swerve.drive(new ChassisSpeeds(), false);
+        swerve.drive(new ChassisSpeeds());
     }
 
     @Override

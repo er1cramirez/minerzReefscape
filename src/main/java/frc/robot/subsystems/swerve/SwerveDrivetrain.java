@@ -21,6 +21,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
 // import frc.robot.telemetry.SwerveDrivetrainTelemetry;
 import frc.robot.telemetry.SwerveTelemetry;
+import frc.robot.util.DriveMode;
 
 public class SwerveDrivetrain extends SubsystemBase{
     // Hardware
@@ -40,6 +41,7 @@ public class SwerveDrivetrain extends SubsystemBase{
     // State
     // private ChassisSpeeds currentSpeeds = new ChassisSpeeds();
     private boolean isFieldRelative = false;
+    private DriveMode driveMode = DriveMode.NORMAL;
 
     /**
      * Constructs a SwerveDrivetrain object.
@@ -76,10 +78,10 @@ public class SwerveDrivetrain extends SubsystemBase{
     /**
      * Drive the robot with given chassis speeds
      */
-    public void drive(ChassisSpeeds speeds, boolean isFieldRelative) {
-        if (isFieldRelative) {
-            speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRobotHeading());
-        }
+    public void drive(ChassisSpeeds speeds) {
+        // if (isFieldRelative) {
+        //     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRobotHeading());
+        // }
         // speeds = ChassisSpeeds.fromRobotRelativeSpeeds(speeds, getRobotHeading());
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         setModuleStates(states);
@@ -98,7 +100,7 @@ public class SwerveDrivetrain extends SubsystemBase{
     }
 
     public void stop() {
-        drive(new ChassisSpeeds(), isFieldRelative);
+        drive(new ChassisSpeeds());
     }
 
     // get Yaw from gyro
@@ -256,5 +258,13 @@ public class SwerveDrivetrain extends SubsystemBase{
     @Override
     public void initSendable(SendableBuilder builder) {
         telemetry.initTelemetry(builder);
+    }
+
+    public void setDriveMode(DriveMode mode) {
+        this.driveMode = mode;
+    }
+
+    public DriveMode getDriveMode() {
+        return driveMode;
     }
 }
