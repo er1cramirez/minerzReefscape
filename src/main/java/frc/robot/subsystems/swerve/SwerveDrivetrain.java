@@ -108,8 +108,7 @@ public class SwerveDrivetrain extends SubsystemBase{
         // CCW is positive
 
         return Rotation2d.fromDegrees(
-            gyro.getFusedHeading()).plus(
-                SwerveConstants.kGyroReversed ? Rotation2d.fromDegrees(180) : Rotation2d.fromDegrees(0));
+            gyro.getFusedHeading()).plus(Rotation2d.fromRadians(Math.PI/2));
         // return new Rotation2d();
     }
 
