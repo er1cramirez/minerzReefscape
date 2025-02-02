@@ -5,11 +5,12 @@ import java.util.Map;
 
 import com.studica.frc.AHRS;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -19,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.subsystems.Vision;
 // import frc.robot.telemetry.SwerveDrivetrainTelemetry;
 import frc.robot.telemetry.SwerveTelemetry;
 import frc.robot.util.DriveMode;
@@ -27,10 +29,15 @@ public class SwerveDrivetrain extends SubsystemBase{
     // Hardware
     private final SwerveModule[] swerveModules;
     private final AHRS gyro;
+
+    // Vision
+    private final Vision vision;
+    // private boolean visionEnabled = true;
     
     // Kinematics & Odometry
     private final SwerveDriveKinematics kinematics;
-    private final SwerveDriveOdometry odometry;
+    // Replace odometry with poseEstimator
+    private final SwerveDrivePoseEstimator poseEstimator;
     private Pose2d pose;
 
     // Telemetry
@@ -56,15 +63,21 @@ public class SwerveDrivetrain extends SubsystemBase{
         };
         gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
         
+        // Initialize vision
+        vision = new Vision();
         // Initialize kinematics and odometry
         kinematics = Constants.SwerveConstants.kinematics;
         resetRobotHeading();
         // Initialize odometry with initial position
-        this.odometry = new SwerveDriveOdometry(
+        this.poseEstimator = new SwerveDrivePoseEstimator(
             kinematics,
             getRobotHeading(),
             getModulePositions(),
-            new Pose2d()
+            new Pose2d(),
+            // State measurement standard deviations (how much we trust our encoders/gyro)
+            VecBuilder.fill(0.1, 0.1, 0.1),
+            // Vision measurement standard deviations (how much we trust vision measurements)
+            VecBuilder.fill(0.9, 0.9, 0.9)
         );
         
         pose = new Pose2d();
@@ -79,13 +92,8 @@ public class SwerveDrivetrain extends SubsystemBase{
      * Drive the robot with given chassis speeds
      */
     public void drive(ChassisSpeeds speeds) {
-        // if (isFieldRelative) {
-        //     speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getRobotHeading());
-        // }
-        // speeds = ChassisSpeeds.fromRobotRelativeSpeeds(speeds, getRobotHeading());
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
         setModuleStates(states);
-        // currentSpeeds = speeds;
     }
 
 
@@ -123,11 +131,13 @@ public class SwerveDrivetrain extends SubsystemBase{
         return pose;
     }
 
+    // Update resetPose method
     public void resetPose(Pose2d pose) {
-        odometry.resetPosition(
-            getRobotHeading(), 
-            getModulePositions(), 
-            pose);
+        poseEstimator.resetPosition(
+            getRobotHeading(),
+            getModulePositions(),
+            pose
+        );
         this.pose = pose;
     }
 
@@ -240,12 +250,24 @@ public class SwerveDrivetrain extends SubsystemBase{
      * Periodic method.
      */
     @Override
-    public void periodic(){
-        // Update odometry
-        pose = odometry.update(
+    public void periodic() {
+        // Update pose estimator with encoder/gyro data
+        pose = poseEstimator.update(
             getRobotHeading(),
             getModulePositions()
         );
+
+        // Add vision measurements when available
+        var visionEst = vision.getEstimatedGlobalPose();
+        visionEst.ifPresent(est -> {
+            var stdDevs = vision.getEstimationStdDevs();
+            poseEstimator.addVisionMeasurement(
+                est.estimatedPose.toPose2d(),
+                est.timestampSeconds,
+                stdDevs
+            );
+        });
+
         telemetry.updateTelemetry();
     }
 
