@@ -25,7 +25,7 @@ public class CoralGrabberArm extends SubsystemBase {
     public CoralGrabberArm() {
         // Initialize hardware
         // armMotor = new VictorSPX(CoralConstants.ARM_MOTOR_ID);
-        armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushed);
+        armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushless);
         
         configureMotor();
     }
@@ -35,7 +35,7 @@ public class CoralGrabberArm extends SubsystemBase {
         config.smartCurrentLimit(SimpleElevatorConstants.CURRENT_LIMIT);
         config.voltageCompensation(12.0);
         config.idleMode(IdleMode.kBrake);
-        armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
     // private void configureMotor() {
     //     armMotor.configFactoryDefault();
