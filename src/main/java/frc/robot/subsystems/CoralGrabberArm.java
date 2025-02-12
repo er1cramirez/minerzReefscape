@@ -30,7 +30,7 @@ public class CoralGrabberArm extends SubsystemBase {
     private static final double MAX_ACCELERATION = 1.5; // Rotations per second squared
     
     public CoralGrabberArm() {
-        armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushed);
+        armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushless);
         encoder = armMotor.getEncoder();
         controller = armMotor.getClosedLoopController();
         
