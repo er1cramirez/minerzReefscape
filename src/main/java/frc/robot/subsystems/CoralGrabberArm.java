@@ -12,8 +12,10 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 // import com.revrobotics.spark.config.MAXMotionConfig;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SimpleElevatorConstants;
+import edu.wpi.first.math.MathUtil;
 
 public class CoralGrabberArm extends SubsystemBase {
     // Hardware
@@ -23,68 +25,71 @@ public class CoralGrabberArm extends SubsystemBase {
 
     // Position tracking
     private double targetPosition = 0.0;
-    private static final double MAX_POSITION = 5.0; // Maximum rotations
-    private static final double MIN_POSITION = 0.0;
-    private static final double POSITION_CONVERSION_FACTOR = 1.0; // Adjust based on gear ratio
-    private static final double MAX_VELOCITY = 2.0; // Rotations per second
-    private static final double MAX_ACCELERATION = 1.5; // Rotations per second squared
+    private static final double MAX_POSITION = 10.0; // Adjust these limits based on mechanism
+    private static final double MIN_POSITION = -10.0;
+    private static final double GEAR_RATIO = 36; // Verify actual gear ratio
     
     public CoralGrabberArm() {
-        armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushed);
+        armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushless);
         encoder = armMotor.getEncoder();
         controller = armMotor.getClosedLoopController();
         
         configureMotor();
         encoder.setPosition(0); // Reset encoder on startup
+
+        SmartDashboard.putData("CoralGrabberArm", this);
     }
 
     private void configureMotor() {
         SparkMaxConfig config = new SparkMaxConfig();
         config.inverted(true);
-        config.smartCurrentLimit(SimpleElevatorConstants.CURRENT_LIMIT);
+        config.smartCurrentLimit(40);
         config.voltageCompensation(12.0);
         config.idleMode(IdleMode.kBrake);
 
-        // Configure encoder
-        config.encoder.positionConversionFactor(POSITION_CONVERSION_FACTOR);
-        config.encoder.velocityConversionFactor(POSITION_CONVERSION_FACTOR / 60.0);
+        // Conversion to consider gear ratio
+        // One motor rotation = (1/GEAR_RATIO) mechanism rotations
+        config.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
+        config.encoder.velocityConversionFactor(1.0 / (GEAR_RATIO * 60.0));
 
-        // Configure closed loop
+        // PID without position wrapping
         config.closedLoop
-            .p(0.05)
+            .p(0.4)
             .i(0.0)
             .d(0.0)
             .outputRange(-1, 1);
-
-        // Configure MAXMotion
-        config.closedLoop.maxMotion
-            .maxVelocity(MAX_VELOCITY)
-            .maxAcceleration(MAX_ACCELERATION)
-            .allowedClosedLoopError(1);
 
         armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public void setSpeed(double speed) {
-        // Use speed input to adjust target position
-        targetPosition += speed * 0.02; // Scale by loop period (20ms)
-        
-        // Clamp target position
-        targetPosition = Math.min(Math.max(targetPosition, MIN_POSITION), MAX_POSITION);
-        
-        // Set position using MAXMotion
-        controller.setReference(targetPosition, ControlType.kMAXMotionPositionControl);
+        double newTarget = targetPosition + speed * 0.01;
+        // Limit target position
+        targetPosition = MathUtil.clamp(newTarget, MIN_POSITION, MAX_POSITION);
+        controller.setReference(targetPosition, ControlType.kPosition);
     }
     
     public void stop() {
-        // Maintain current position when stopped
-        // targetPosition = encoder.getPosition();
-        // controller.setReference(targetPosition, ControlType.kSmartMotion);
+        targetPosition = encoder.getPosition();
+        controller.setReference(targetPosition, ControlType.kPosition);
+    }
+
+    // Método para prueba directa del motor
+    public void setDirectOutput(double output) {
+        armMotor.set(output);
+    }
+
+    // Método para ir a posición fija de prueba
+    public void goToTestPosition(double position) {
+        targetPosition = position;
+        controller.setReference(position, ControlType.kPosition);
     }
     
     @Override
     public void periodic() {
-        // Optional: Add position monitoring/logging
+        // Monitor position error
+        // double currentPos = encoder.getPosition();
+        // double error = targetPosition - currentPos;
     }
     
     @Override
@@ -92,6 +97,5 @@ public class CoralGrabberArm extends SubsystemBase {
         builder.setSmartDashboardType("CoralGrabberArm");
         builder.addDoubleProperty("Current Position", encoder::getPosition, null);
         builder.addDoubleProperty("Target Position", () -> targetPosition, null);
-        builder.addDoubleProperty("Output", armMotor::get, null);
     }
 }

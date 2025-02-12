@@ -13,16 +13,13 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopAlgaeArm;
-// import frc.robot.commands.ElevatorControlCommand;
 import frc.robot.commands.TeleopAlgaeGrabber;
 import frc.robot.commands.TeleopClimber;
 import frc.robot.commands.TeleopCoralArm;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.TeleopSimpleElevator;
 import frc.robot.commands.auto.TimedAutoExample;
-// import frc.robot.commands.TeleopElevator;
 import frc.robot.commands.TeleopCoralGrabber;
-// import frc.robot.commands.auto.ComplexAutoCommand;
 import frc.robot.subsystems.AlgaeGrabber;
 import frc.robot.subsystems.AlgaeGrabberArm;
 import frc.robot.subsystems.Climber;
@@ -31,16 +28,13 @@ import frc.robot.subsystems.CoralGrabberArm;
 import frc.robot.subsystems.LedStripe;
 import frc.robot.subsystems.LedStripe.LedState;
 import frc.robot.subsystems.SimpleElevator;
-// import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 import frc.robot.telemetry.RobotTelemetry;
-// import frc.robot.util.ElevatorStates;
 import frc.robot.util.DriveMode;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveDrivetrain swerve = new SwerveDrivetrain();
-  // private final Elevator elevator = new Elevator();
   private final SimpleElevator elevator = new SimpleElevator();
   private final CoralGrabber coralGrabber = new CoralGrabber();
   private final AlgaeGrabber algaeGrabber = new AlgaeGrabber();
@@ -60,15 +54,12 @@ public class RobotContainer {
   public RobotContainer() {
     configureCommands();
     configureBindings();
+    configureSmartDashboard();
 
     // Camera
     CameraServer.startAutomaticCapture();
     SmartDashboard.putData(CommandScheduler.getInstance());
     // Auto Commands
-    // complexCommand = new ComplexAutoCommand(
-    //   swerve,
-    //   elevator
-    // );
     simpleTimedAuto = new TimedAutoExample(
         swerve,
         elevator,
@@ -106,11 +97,6 @@ public class RobotContainer {
       elevator,
       () -> (mechanismController.getRightTriggerAxis() - mechanismController.getLeftTriggerAxis())
     ));
-    // Manual control
-    // elevator.setDefaultCommand(new TeleopElevator(
-    //   elevator,
-    //   () -> (mechanismController.getRightTriggerAxis() - mechanismController.getLeftTriggerAxis())
-    // ));
     
     climber.setDefaultCommand(new TeleopClimber(
         climber,
@@ -153,15 +139,25 @@ public class RobotContainer {
     new JoystickButton(chassisController, XboxController.Button.kRightBumper.value)
         .onTrue(new InstantCommand(() -> swerve.setDriveMode(DriveMode.PRECISION)))
         .onFalse(new InstantCommand(() -> swerve.setDriveMode(DriveMode.NORMAL)));
+  }
 
-    // Preset positions
-    // new JoystickButton(mechanismController, XboxController.Button.kA.value)
-    //   .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L1));
+  private void configureSmartDashboard() {
+    // Test buttons for CoralGrabberArm
+  //   SmartDashboard.putData("Coral/Test Forward", 
+  //       Commands.runOnce(() -> coralArm.setDirectOutput(0.5))
+  //              .andThen(Commands.waitSeconds(2))
+  //              .andThen(() -> coralArm.setDirectOutput(0)));
 
-    // new JoystickButton(mechanismController, XboxController.Button.kB.value)
-    //   .onTrue(new ElevatorControlCommand(elevator, ElevatorStates.L2));
+  //   SmartDashboard.putData("Coral/Test Backward", 
+  //       Commands.runOnce(() -> coralArm.setDirectOutput(-0.5))
+  //              .andThen(Commands.waitSeconds(2))
+  //              .andThen(() -> coralArm.setDirectOutput(0)));
 
+  //   SmartDashboard.putData("Coral/Go To 45deg", 
+  //       Commands.runOnce(() -> coralArm.goToTestPosition(10)));
 
+  //   SmartDashboard.putData("Coral/Go To 0deg", 
+  //       Commands.runOnce(() -> coralArm.goToTestPosition(0)));
   }
 
   public Command getAutonomousCommand() {
