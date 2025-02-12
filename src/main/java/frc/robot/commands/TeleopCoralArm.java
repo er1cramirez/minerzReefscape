@@ -41,7 +41,7 @@ public class TeleopCoralArm extends Command {
     
     @Override
     public void end(boolean interrupted) {
-        // arm.stop();
+        arm.stop();
     }
     
     @Override
