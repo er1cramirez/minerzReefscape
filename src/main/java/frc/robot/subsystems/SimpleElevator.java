@@ -49,6 +49,7 @@ public class SimpleElevator extends SubsystemBase {
         motor.setInverted(false);
         motor.configVoltageCompSaturation(12.0);
         motor.enableVoltageCompensation(true);
+        motor.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
     }
     // private void configureMotor() {
     //     SparkMaxConfig config = new SparkMaxConfig();
