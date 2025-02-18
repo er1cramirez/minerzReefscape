@@ -48,9 +48,9 @@ public class Constants {
         public static final double chassisLength = Units.inchesToMeters(20);//inch
         // Kinematics
         public static final double maxSpeed = 3.0;//m/s
-        public static final double maxAngularSpeed = 2;//rad/s
+        public static final double maxAngularSpeed = 4;//rad/s
         public static final double translationalSlew = 1.5;//m/s^2
-        public static final double rotationalSlew = Math.PI/2;//rad/s^2
+        public static final double rotationalSlew = Math.PI;//rad/s^2
         public static final double precisionModeSpeedMultiplier = 0.2;
         public static final double turboModeSpeedMultiplier = 1.5;
         public static final double steeringErrorTolerance = 0.1; // rad
@@ -169,8 +169,8 @@ public class Constants {
     public static final class CoralConstants {
         public static final int GRABBER_MOTOR_ID = 11; // Update this ID as needed
         public static final int ARM_MOTOR_ID = 12;
-        public static final double SLEW_RATE = 2.5;
-        public static final double MAX_SPEED = 1.0;
+        public static final double SLEW_RATE = 1.5;
+        public static final double MAX_SPEED = 0.5;
     }
 
     public static final class AlgaeConstants {
