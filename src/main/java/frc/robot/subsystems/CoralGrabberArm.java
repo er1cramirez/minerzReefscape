@@ -15,7 +15,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SimpleElevatorConstants;
-import edu.wpi.first.math.MathUtil;
+// import edu.wpi.first.math.MathUtil;
 
 public class CoralGrabberArm extends SubsystemBase {
     // Hardware
@@ -25,9 +25,12 @@ public class CoralGrabberArm extends SubsystemBase {
 
     // Position tracking
     private double targetPosition = 0.0;
-    private static final double MAX_POSITION = 10.0; // Adjust these limits based on mechanism
-    private static final double MIN_POSITION = -10.0;
+    // private static final double MAX_POSITION = 5; // Adjust these limits based on mechanism
+    // private static final double MIN_POSITION = -5;
     private static final double GEAR_RATIO = 36; // Verify actual gear ratio
+    private static final double DEADBAND = 0.05;
+
+    private boolean wasMoving = false;
     
     public CoralGrabberArm() {
         armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushless);
@@ -54,19 +57,28 @@ public class CoralGrabberArm extends SubsystemBase {
 
         // PID without position wrapping
         config.closedLoop
-            .p(0.4)
+            .p(0.6)
             .i(0.0)
-            .d(0.0)
+            .d(0.3)
             .outputRange(-1, 1);
 
         armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     public void setSpeed(double speed) {
-        double newTarget = targetPosition + speed * 0.01;
-        // Limit target position
-        targetPosition = MathUtil.clamp(newTarget, MIN_POSITION, MAX_POSITION);
-        controller.setReference(targetPosition, ControlType.kPosition);
+        if (Math.abs(speed) > DEADBAND) {
+            // Direct speed control when there's input
+            armMotor.set(speed);
+            wasMoving = true;
+        } else {
+            if (wasMoving) {
+                // Capture position when input stops
+                targetPosition = encoder.getPosition();
+                wasMoving = false;
+            }
+            // Hold position
+            controller.setReference(targetPosition, ControlType.kPosition);
+        }
     }
     
     public void stop() {
@@ -87,9 +99,9 @@ public class CoralGrabberArm extends SubsystemBase {
     
     @Override
     public void periodic() {
-        // Monitor position error
-        // double currentPos = encoder.getPosition();
-        // double error = targetPosition - currentPos;
+        // SmartDashboard.putNumber("Coral/Position", encoder.getPosition());
+        // SmartDashboard.putNumber("Coral/Target", targetPosition);
+        // SmartDashboard.putBoolean("Coral/IsHolding", !wasMoving);
     }
     
     @Override
