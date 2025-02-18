@@ -185,7 +185,7 @@ public class Constants {
         public static final double kPThetaController = 1;
         public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
-        public static final double MAX_SPEED = 3;
-        public static final double MAX_ACCELERATION = 1;
+        public static final double MAX_SPEED = 1;
+        public static final double MAX_ACCELERATION = 0.5;
     }
 }

@@ -106,15 +106,17 @@ public class SwerveDrivetrain extends SubsystemBase{
     // get Yaw from gyro
     public Rotation2d getRobotHeading(){
         // CCW is positive
-
         return Rotation2d.fromDegrees(
-            gyro.getFusedHeading()).plus(Rotation2d.fromRadians(Math.PI/2));
+            gyro.getYaw());
+        // return Rotation2d.fromDegrees(
+        //     gyro.getFusedHeading()).plus(Rotation2d.fromRadians(Math.PI/2));
         // return new Rotation2d();
     }
 
     // Reset the robot heading(yaw)
     private void resetRobotHeading(){
         // Reset the gyro with the appropriate offset based on alliance
+        gyro.zeroYaw();
         gyro.reset();
     } 
 
