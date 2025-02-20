@@ -57,18 +57,18 @@ public class SwerveTrajectoryCommand extends SwerveControllerCommand {
     }
 
     private static PIDController createXController() {
-        return new PIDController(AutoConstants.kPXController, 0, 0);
+        return new PIDController(AutoConstants.kPXController, AutoConstants.kIXController, AutoConstants.kDXController);
     }
     
     private static PIDController createYController() {
-        return new PIDController(AutoConstants.kPYController, 0, 0);
+        return new PIDController(AutoConstants.kPYController, AutoConstants.kIYController, AutoConstants.kDYController);
     }
     
     private static ProfiledPIDController createThetaController() {
         var controller = new ProfiledPIDController(
             AutoConstants.kPThetaController,
-            0,
-            0,
+            AutoConstants.kIThetaController,
+            AutoConstants.kDThetaController,
             new TrapezoidProfile.Constraints(
                 AutoConstants.kMaxAngularSpeedRadiansPerSecond,
                 AutoConstants.kMaxAngularSpeedRadiansPerSecondSquared)

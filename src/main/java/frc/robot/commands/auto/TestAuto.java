@@ -7,8 +7,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.subsystems.SimpleElevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
 public class TestAuto extends SequentialCommandGroup {
@@ -17,7 +19,7 @@ public class TestAuto extends SequentialCommandGroup {
     private final Pose2d goalPose = new Pose2d(1, 1, new Rotation2d());
 
     // Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
-    public TestAuto(SwerveDrivetrain swerve) {
+    public TestAuto(SwerveDrivetrain swerve, SimpleElevator elevator) {
         Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
 
         addCommands(
@@ -26,10 +28,13 @@ public class TestAuto extends SequentialCommandGroup {
                 swerve,
                 trajectory,
                 new Rotation2d()
-            )
+            ),
+            Commands.startEnd(
+                () -> elevator.setSpeed(0.3),
+                () -> elevator.stop(),
+                elevator
+            ).withTimeout(0.5)
         );
-        // Add your commands here, e.g.
-        // addCommands(new FooCommand(), new BarCommand());
     }
 
 

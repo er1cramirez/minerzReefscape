@@ -55,7 +55,8 @@ public class SwerveDrivetrain extends SubsystemBase{
             new SwerveModule(Constants.SwerveConstants.backRightModuleConstants)
         };
         gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
-        
+        while (gyro.isCalibrating());
+        // gyro.
         // Initialize kinematics and odometry
         kinematics = Constants.SwerveConstants.kinematics;
         resetRobotHeading();
@@ -106,17 +107,17 @@ public class SwerveDrivetrain extends SubsystemBase{
     // get Yaw from gyro
     public Rotation2d getRobotHeading(){
         // CCW is positive
-        return Rotation2d.fromDegrees(
-            gyro.getYaw());
+        // return Rotation2d.fromDegrees(
+        //     gyro.getYaw());
         // return Rotation2d.fromDegrees(
         //     gyro.getFusedHeading()).plus(Rotation2d.fromRadians(Math.PI/2));
         // return new Rotation2d();
+        // gyro.get
+        return gyro.getRotation2d();
     }
 
     // Reset the robot heading(yaw)
     private void resetRobotHeading(){
-        // Reset the gyro with the appropriate offset based on alliance
-        gyro.zeroYaw();
         gyro.reset();
     } 
 
