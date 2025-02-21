@@ -111,13 +111,15 @@ public class SwerveDrivetrain extends SubsystemBase{
         //     gyro.getYaw());
         // return Rotation2d.fromDegrees(
         //     gyro.getFusedHeading()).plus(Rotation2d.fromRadians(Math.PI/2));
-        // return new Rotation2d();
+        return new Rotation2d();
         // gyro.get
-        return gyro.getRotation2d();
+        //return gyro.getRotation2d();
+        //return Rotation2d.fromDegrees(gyro.getYaw());
     }
 
     // Reset the robot heading(yaw)
-    private void resetRobotHeading(){
+    public void resetRobotHeading(){
+        gyro.zeroYaw();
         gyro.reset();
     } 
 

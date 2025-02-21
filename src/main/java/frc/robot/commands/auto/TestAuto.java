@@ -8,21 +8,25 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.AutoConstants;
-import frc.robot.subsystems.SimpleElevator;
+import frc.robot.subsystems.CoralGrabber;
+import frc.robot.subsystems.CoralGrabberArm;
+//import frc.robot.subsystems.SimpleElevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
 public class TestAuto extends SequentialCommandGroup {
 
     private final Pose2d startPose = new Pose2d(0, 0, new Rotation2d());
-    private final Pose2d goalPose = new Pose2d(1, 1, new Rotation2d());
+    private final Pose2d goalPose = new Pose2d(2.5, 2, new Rotation2d());
 
     // Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
-    public TestAuto(SwerveDrivetrain swerve, SimpleElevator elevator) {
+    public TestAuto(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber) {
         Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
 
         addCommands(
+            new InstantCommand(() -> swerve.resetRobotHeading()),
             new SwerveTrajectoryCommand(
                 "Test Auto",
                 swerve,
@@ -30,10 +34,15 @@ public class TestAuto extends SequentialCommandGroup {
                 new Rotation2d()
             ),
             Commands.startEnd(
-                () -> elevator.setSpeed(0.3),
-                () -> elevator.stop(),
-                elevator
-            ).withTimeout(0.5)
+                () -> coralArm.setSpeed(0.5),
+                () -> coralArm.stop(),
+                coralArm
+            ).withTimeout(0.3),
+            Commands.startEnd(
+                () -> coralGrabber.release(),
+                () -> coralGrabber.stop(),
+                coralGrabber
+            ).withTimeout(1)
         );
     }
 

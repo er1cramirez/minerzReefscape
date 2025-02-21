@@ -80,6 +80,8 @@ public class CoralGrabberArm extends SubsystemBase {
             controller.setReference(targetPosition, ControlType.kPosition);
         }
     }
+
+
     
     public void stop() {
         targetPosition = encoder.getPosition();
