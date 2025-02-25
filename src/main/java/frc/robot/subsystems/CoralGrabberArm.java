@@ -57,7 +57,7 @@ public class CoralGrabberArm extends SubsystemBase {
 
         // PID without position wrapping
         config.closedLoop
-            .p(0.6)
+            .p(0.7)
             .i(0.0)
             .d(0.3)
             .outputRange(-1, 1);

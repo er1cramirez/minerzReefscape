@@ -192,7 +192,7 @@ public class Constants {
 
         public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
         public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
-        public static final double MAX_SPEED = 2;
+        public static final double MAX_SPEED = 1.5;
         public static final double MAX_ACCELERATION = 1;
     }
 }
