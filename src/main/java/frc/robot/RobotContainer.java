@@ -62,7 +62,7 @@ public class RobotContainer {
     SmartDashboard.putData(CommandScheduler.getInstance());
     // Auto Commands
     testAuto = new TestAuto(
-        swerve);
+        swerve, elevator);
     // complexCommand = new InstantCommand();
 
     // Configure telemetry
