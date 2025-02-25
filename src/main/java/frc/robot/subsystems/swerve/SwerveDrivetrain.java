@@ -26,7 +26,7 @@ import frc.robot.util.DriveMode;
 public class SwerveDrivetrain extends SubsystemBase{
     // Hardware
     private final SwerveModule[] swerveModules;
-    private final AHRS gyro;
+    //private final AHRS gyro;
     
     // Kinematics & Odometry
     private final SwerveDriveKinematics kinematics;
@@ -54,8 +54,8 @@ public class SwerveDrivetrain extends SubsystemBase{
             new SwerveModule(Constants.SwerveConstants.backLeftModuleConstants),
             new SwerveModule(Constants.SwerveConstants.backRightModuleConstants)
         };
-        gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
-        while (gyro.isCalibrating());
+        //gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
+        //while (gyro.isCalibrating());
         // gyro.
         // Initialize kinematics and odometry
         kinematics = Constants.SwerveConstants.kinematics;
@@ -119,8 +119,8 @@ public class SwerveDrivetrain extends SubsystemBase{
 
     // Reset the robot heading(yaw)
     public void resetRobotHeading(){
-        gyro.zeroYaw();
-        gyro.reset();
+        //gyro.zeroYaw();
+        //gyro.reset();
     } 
 
     

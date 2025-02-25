@@ -19,7 +19,7 @@ import frc.robot.subsystems.swerve.SwerveDrivetrain;
 public class TestAuto extends SequentialCommandGroup {
 
     private final Pose2d startPose = new Pose2d(0, 0, new Rotation2d());
-    private final Pose2d goalPose = new Pose2d(2.5, 2, new Rotation2d());
+    private final Pose2d goalPose = new Pose2d(0,0, new Rotation2d());
 
     // Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
     public TestAuto(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber) {
@@ -37,7 +37,7 @@ public class TestAuto extends SequentialCommandGroup {
                 () -> coralArm.setSpeed(0.5),
                 () -> coralArm.stop(),
                 coralArm
-            ).withTimeout(0.3),
+            ).withTimeout(1),
             Commands.startEnd(
                 () -> coralGrabber.release(),
                 () -> coralGrabber.stop(),
