@@ -16,13 +16,13 @@ import frc.robot.subsystems.CoralGrabberArm;
 //import frc.robot.subsystems.SimpleElevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
-public class TestAuto extends SequentialCommandGroup {
+public class AutoCenter extends SequentialCommandGroup {
 
     private final Pose2d startPose = new Pose2d(0, 0, new Rotation2d());
-    private final Pose2d goalPose = new Pose2d(2.215,0, new Rotation2d());
+    private final Pose2d goalPose = new Pose2d(2.2,0, new Rotation2d());
 
     // Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
-    public TestAuto(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber) {
+    public AutoCenter(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber) {
         Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);  
 
         addCommands(
@@ -45,12 +45,7 @@ public class TestAuto extends SequentialCommandGroup {
                 trajectory,
                 new Rotation2d()
             ),
-            Commands.waitSeconds(2),
-            Commands.startEnd(
-                () -> coralGrabber.release(),
-                () -> coralGrabber.stop(),
-                coralGrabber
-            ).withTimeout(1)
+            Commands.waitSeconds(2)
         );
     }
 

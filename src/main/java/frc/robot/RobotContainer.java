@@ -18,7 +18,10 @@ import frc.robot.commands.TeleopClimber;
 import frc.robot.commands.TeleopCoralArm;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.TeleopSimpleElevator;
-import frc.robot.commands.auto.TestAuto;
+import frc.robot.commands.auto.AutoCenter;
+import frc.robot.commands.auto.AutoLeave;
+import frc.robot.commands.auto.AutoRedLeft;
+import frc.robot.commands.auto.AutoRedRight;
 // import frc.robot.commands.auto.TimedAutoExample;
 import frc.robot.commands.TeleopCoralGrabber;
 import frc.robot.subsystems.AlgaeGrabber;
@@ -50,7 +53,10 @@ public class RobotContainer {
   private final XboxController chassisController = new XboxController(0);
   private final XboxController mechanismController = new XboxController(1);
   // Auto Commands
-  private final Command testAuto;
+  private final Command autoCenter;
+  private final Command autoLeave;
+  private final Command autoRedLeft;
+  private final Command autoRedRight;
   // private final Command simpleTimedAuto;
   public RobotContainer() {
     configureCommands();
@@ -61,12 +67,21 @@ public class RobotContainer {
     CameraServer.startAutomaticCapture();
     SmartDashboard.putData(CommandScheduler.getInstance());
     // Auto Commands
-    testAuto = new TestAuto(
+    autoCenter = new AutoCenter(
+        swerve, coralArm, coralGrabber);
+    autoLeave = new AutoLeave(
+        swerve, coralArm, coralGrabber);
+    autoRedLeft = new AutoRedLeft(
+        swerve, coralArm, coralGrabber);
+    autoRedRight = new AutoRedRight(
         swerve, coralArm, coralGrabber);
     // complexCommand = new InstantCommand();
 
     // Configure telemetry
-    telemetry.addAutoCommand("Test Auto", testAuto);
+    telemetry.addAutoCommand("Auto Centro", autoCenter);
+    telemetry.addAutoCommand("Auto Solo Sale", autoLeave);
+    telemetry.addAutoCommand("Auto Izquierdo", autoRedLeft);
+    telemetry.addAutoCommand("Auto Derecho", autoRedRight);
     telemetry.initDashboard();
   }
 
