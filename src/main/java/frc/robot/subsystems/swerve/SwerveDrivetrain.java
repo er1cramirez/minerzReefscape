@@ -25,7 +25,7 @@ import frc.robot.util.DriveMode;
 
 public class SwerveDrivetrain extends SubsystemBase{
     // Hardware
-    private final SwerveModule[] swerveModules;
+    private final TalonSwerveModule[] swerveModules;
     private final AHRS gyro;
     
     // Kinematics & Odometry
@@ -48,11 +48,11 @@ public class SwerveDrivetrain extends SubsystemBase{
      */
     public SwerveDrivetrain(){
         // Initialize hardware
-        swerveModules = new SwerveModule[] {
-            new SwerveModule(Constants.SwerveConstants.frontLeftModuleConstants),
-            new SwerveModule(Constants.SwerveConstants.frontRightModuleConstants),
-            new SwerveModule(Constants.SwerveConstants.backLeftModuleConstants),
-            new SwerveModule(Constants.SwerveConstants.backRightModuleConstants)
+        swerveModules = new TalonSwerveModule[] {
+            new TalonSwerveModule(Constants.SwerveConstants.frontLeftModuleConstants),
+            new TalonSwerveModule(Constants.SwerveConstants.frontRightModuleConstants),
+            new TalonSwerveModule(Constants.SwerveConstants.backLeftModuleConstants),
+            new TalonSwerveModule(Constants.SwerveConstants.backRightModuleConstants)
         };
         gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
         
@@ -175,17 +175,17 @@ public class SwerveDrivetrain extends SubsystemBase{
         // Set the swerve modules to lock mode(x pattern)
     }
 
-    public void calibrateSteeringEncoders(){
-        // Calibrate the steering encoders
-        boolean allCalibrated = false;
-        for (int i = 0; i < swerveModules.length; i++) {
-            allCalibrated &= swerveModules[i].calibrateSteering();
-        }
-        if(allCalibrated){
-            System.out.println("steer encoder reset done");
-            // Logger.getInstance().recordOutput("Calibration/Steering", true);
-        }
-    }
+    // public void calibrateSteeringEncoders(){
+    //     // Calibrate the steering encoders
+    //     boolean allCalibrated = false;
+    //     for (int i = 0; i < swerveModules.length; i++) {
+    //         allCalibrated &= swerveModules[i].calibrateSteering();
+    //     }
+    //     if(allCalibrated){
+    //         System.out.println("steer encoder reset done");
+    //         // Logger.getInstance().recordOutput("Calibration/Steering", true);
+    //     }
+    // }
 
     public void testEachModule() {
         final double TEST_SPEED = 0.3;

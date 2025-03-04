@@ -3,14 +3,16 @@ package frc.robot.subsystems.swerve;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
+// import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -76,7 +78,7 @@ public class TalonSwerveModule extends SubsystemBase {
         config.closedLoop.minOutput(moduleConstants.drivingPIDConstants().kMinOutput());
         config.closedLoop.maxOutput(moduleConstants.drivingPIDConstants().kMaxOutput());
 
-        drivingMotor.configure(config);
+        drivingMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         drivingEncoder.setPosition(0);
     }
 
@@ -107,15 +109,28 @@ public class TalonSwerveModule extends SubsystemBase {
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
-        // Update current state
-        currentState = new SwerveModuleState(getDriveVelocity(), getSteerAngle());
+        // Update current state before optimization
+        updateCurrentState();
+
+        // Create mutable copy of desired state
+        SwerveModuleState optimizedState = new SwerveModuleState(
+            desiredState.speedMetersPerSecond,
+            desiredState.angle
+        );
 
         // Optimize the reference state to avoid spinning further than 90 degrees
-        targetState = SwerveModuleState.optimize(desiredState, currentState.angle);
+        optimizedState.optimize(currentState.angle);
+
+        // Update target state after optimization
+        targetState = desiredState;
+
+        // Apply speed scaling based on angle difference
+        optimizedState.cosineScale(currentState.angle);
+        // Set motor references
 
         // Set motor references
         drivingController.setReference(targetState.speedMetersPerSecond, ControlType.kVelocity);
-        steeringMotor.setControl(steeringMotor.getPosition().withPosition(targetState.angle.getRotations()));
+        steeringMotor.setPosition(targetState.angle.getRotations());
     }
 
     private double getDriveVelocity() {
@@ -123,7 +138,7 @@ public class TalonSwerveModule extends SubsystemBase {
     }
 
     private Rotation2d getSteerAngle() {
-        return Rotation2d.fromRotations(steerAbsoluteEncoder.getAbsolutePosition().getValue());
+        return Rotation2d.fromRotations(steeringMotor.getPosition().getValueAsDouble());
     }
 
     public SwerveModulePosition getPosition() {
@@ -131,6 +146,19 @@ public class TalonSwerveModule extends SubsystemBase {
             drivingEncoder.getPosition(),
             getSteerAngle()
         );
+    }
+
+    private void updateCurrentState() {
+        currentState = new SwerveModuleState(
+            getDriveVelocity(),
+            getSteerAngle()
+        );
+    }
+
+    public SwerveModulePosition getModulePosition() {
+        return new SwerveModulePosition(
+            drivingEncoder.getPosition(),
+            getSteerAngle());
     }
 
     public SwerveModuleState getCurrentState() {
