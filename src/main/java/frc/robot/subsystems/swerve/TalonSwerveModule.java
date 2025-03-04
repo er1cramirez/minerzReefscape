@@ -129,8 +129,9 @@ public class TalonSwerveModule extends SubsystemBase {
         // Set motor references
 
         // Set motor references
-        drivingController.setReference(targetState.speedMetersPerSecond, ControlType.kVelocity);
-        steeringMotor.setPosition(targetState.angle.getRotations());
+        drivingController.setReference(optimizedState.speedMetersPerSecond, ControlType.kVelocity);
+        final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
+        steeringMotor.setControl(m_request.withPosition(optimizedState.angle.getRotations()));
     }
 
     private double getDriveVelocity() {
