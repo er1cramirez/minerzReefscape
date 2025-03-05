@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopDrive;
+import frc.robot.commands.auto.ElevatorTopLimitTestAuto;
+import frc.robot.subsystems.SimpleElevator;
 // import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 import frc.robot.telemetry.RobotTelemetry;
@@ -22,6 +24,7 @@ import frc.robot.util.DriveMode;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final SwerveDrivetrain swerve = new SwerveDrivetrain();
+  private final SimpleElevator elevator = new SimpleElevator();
   // private final Elevator elevator = new Elevator();
   // Robot telemetry
   private final RobotTelemetry telemetry = new RobotTelemetry();
@@ -39,6 +42,9 @@ public class RobotContainer {
 
     // Configure telemetry
     telemetry.addAutoCommand("Test Auto", new InstantCommand());
+    // In your RobotContainer constructor or initialization method
+    telemetry.addAutoCommand("Elevator Top Limit Test", 
+        new ElevatorTopLimitTestAuto(elevator));
     telemetry.initDashboard();
   }
 
