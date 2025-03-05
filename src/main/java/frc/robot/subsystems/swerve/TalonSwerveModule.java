@@ -2,9 +2,12 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
 // import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.revrobotics.RelativeEncoder;
@@ -19,6 +22,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+// import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Mk4iModuleConstants;
@@ -83,10 +87,16 @@ public class TalonSwerveModule extends SubsystemBase {
     }
 
     private void configureSteeringMotor() {
+        /* Configure CANcoder to zero the magnet appropriately */
+        CANcoderConfiguration cc_cfg = new CANcoderConfiguration();
+        cc_cfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
+        cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        // cc_cfg.MagnetSensor.MagnetOffset = 0.4;
+        steerAbsoluteEncoder.getConfigurator().apply(cc_cfg);
         TalonFXConfiguration config = new TalonFXConfiguration();
         
         // Basic motor configuration
-        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         config.MotorOutput.Inverted = moduleConstants.isSteerMotorInverted() ? 
             InvertedValue.Clockwise_Positive : 
             InvertedValue.CounterClockwise_Positive;
@@ -94,6 +104,7 @@ public class TalonSwerveModule extends SubsystemBase {
         // Configure CANcoder as feedback device in Fused mode
         config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         config.Feedback.FeedbackRemoteSensorID = steerAbsoluteEncoder.getDeviceID();
+        config.Feedback.SensorToMechanismRatio = 1.0;
         config.Feedback.RotorToSensorRatio = Constants.SwerveConstants.Mk4iMechanicalConstants.steeringFactor;
         
         // Configure PID
@@ -130,8 +141,8 @@ public class TalonSwerveModule extends SubsystemBase {
 
         // Set motor references
         drivingController.setReference(optimizedState.speedMetersPerSecond, ControlType.kVelocity);
-        final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
-        steeringMotor.setControl(m_request.withPosition(optimizedState.angle.getRotations()));
+        final PositionVoltage anglePosition = new PositionVoltage(0);
+        steeringMotor.setControl(anglePosition.withPosition(optimizedState.angle.getRotations()));
     }
 
     private double getDriveVelocity() {
@@ -169,4 +180,10 @@ public class TalonSwerveModule extends SubsystemBase {
     public SwerveModuleState getTargetState() {
         return targetState;
     }
+
+    // @Override
+    // public void initSendable(SendableBuilder builder) {
+    //     builder.setSmartDashboardType("Talon Swerve Module");
+    //     System.out.println("FX Position: " + fx_pos.toString());
+    //     System.out.println("CANcoder Position: " + cc_pos.toString());
 }
