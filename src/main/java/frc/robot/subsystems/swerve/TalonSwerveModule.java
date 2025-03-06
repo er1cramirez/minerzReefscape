@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve;
 
+import static frc.robot.util.PhoenixUtil.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -87,36 +88,31 @@ public class TalonSwerveModule extends SubsystemBase {
     }
 
     private void configureSteeringMotor() {
+        var turnConfig = new TalonFXConfiguration();
+        turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        turnConfig.Slot0.kP = moduleConstants.steeringPIDConstants().kP();
+        turnConfig.Slot0.kI = moduleConstants.steeringPIDConstants().kI();
+        turnConfig.Slot0.kD = moduleConstants.steeringPIDConstants().kD();
+        turnConfig.Feedback.FeedbackRemoteSensorID = steerAbsoluteEncoder.getDeviceID();
+        turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        turnConfig.Feedback.RotorToSensorRatio = Constants.SwerveConstants.Mk4iMechanicalConstants.steeringFactor;
+        turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / Constants.SwerveConstants.Mk4iMechanicalConstants.steeringFactor;
+        turnConfig.MotionMagic.MotionMagicAcceleration =
+            turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
+        turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * Constants.SwerveConstants.Mk4iMechanicalConstants.steeringFactor;
+        turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
+        turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
+        turnConfig.MotorOutput.Inverted =
+            moduleConstants.isSteerMotorInverted() ? 
+                InvertedValue.Clockwise_Positive : 
+                InvertedValue.CounterClockwise_Positive;
+        tryUntilOk(5, () -> steeringMotor.getConfigurator().apply(turnConfig, 0.25));
         /* Configure CANcoder to zero the magnet appropriately */
         CANcoderConfiguration cc_cfg = new CANcoderConfiguration();
         cc_cfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
         cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         // cc_cfg.MagnetSensor.MagnetOffset = 0.4;
         steerAbsoluteEncoder.getConfigurator().apply(cc_cfg);
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        
-        // Basic motor configuration
-        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        config.MotorOutput.Inverted = moduleConstants.isSteerMotorInverted() ? 
-            InvertedValue.Clockwise_Positive : 
-            InvertedValue.CounterClockwise_Positive;
-
-        // Configure CANcoder as feedback device in Fused mode
-        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-        config.Feedback.FeedbackRemoteSensorID = steerAbsoluteEncoder.getDeviceID();
-        config.Feedback.SensorToMechanismRatio = 1.0;
-        config.Feedback.RotorToSensorRatio = Constants.SwerveConstants.Mk4iMechanicalConstants.steeringFactor;
-        
-        // Configure PID
-        config.Slot0.kP = moduleConstants.steeringPIDConstants().kP();
-        config.Slot0.kI = moduleConstants.steeringPIDConstants().kI();
-        config.Slot0.kD = moduleConstants.steeringPIDConstants().kD();
-        
-        // Enable continuous wrap for steering
-        config.ClosedLoopGeneral.ContinuousWrap = true;
-        
-        // Apply configuration
-        steeringMotor.getConfigurator().apply(config);
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
@@ -180,6 +176,8 @@ public class TalonSwerveModule extends SubsystemBase {
     public SwerveModuleState getTargetState() {
         return targetState;
     }
+
+    
 
     // @Override
     // public void initSendable(SendableBuilder builder) {
