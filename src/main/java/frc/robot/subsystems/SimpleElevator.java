@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,6 +28,7 @@ public class SimpleElevator extends SubsystemBase {
         
         // Initialize debouncer for the top limit switch
         topDebouncer = new Debouncer(SimpleElevatorConstants.DEBOUNCE_TIME, DebounceType.kBoth);
+        SmartDashboard.putData("SimpleEelevator", this);
     }
 
     private void configureMotor() {
@@ -52,7 +54,7 @@ public class SimpleElevator extends SubsystemBase {
      * @return true if top limit switch is triggered
      */
     public boolean isAtTop() {
-        return topDebouncer.calculate(topLimitSwitch.get());
+        return topDebouncer.calculate(!topLimitSwitch.get());
     }
 
     public void setSpeed(double speed) {
