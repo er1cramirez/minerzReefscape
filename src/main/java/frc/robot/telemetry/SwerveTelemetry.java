@@ -82,6 +82,11 @@ public class SwerveTelemetry implements SubsystemTelemetry {
                 () -> swerveDrive.getPose().getX(), null);
             builder.addDoubleProperty("Robot Y Position",
                 () -> swerveDrive.getPose().getY(), null);
+
+            builder.addDoubleProperty("Steering/TargetAngle", 
+                ()->swerveDrive.getTargetStates()[0].angle.getRotations(), null);
+            builder.addDoubleProperty("Steering/CurrentAngle", 
+                ()->swerveDrive.getCurrentStates()[0].angle.getRotations(), null);
         }
     }
     
