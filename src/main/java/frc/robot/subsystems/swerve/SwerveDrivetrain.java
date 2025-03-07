@@ -255,6 +255,10 @@ public class SwerveDrivetrain extends SubsystemBase{
     @Override
     public void initSendable(SendableBuilder builder) {
         telemetry.initTelemetry(builder);
+        double targetAngle = swerveModules[0].getTargetState().angle.getRotations();
+        SmartDashboard.putNumber("Steering/TargetAngle", targetAngle);
+        double currentAngle = swerveModules[0].getCurrentState().angle.getRotations();
+        SmartDashboard.putNumber("Steering/CurrentAngle", currentAngle);
     }
 
     public void setDriveMode(DriveMode mode) {

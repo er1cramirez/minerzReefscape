@@ -104,7 +104,7 @@ public class Constants {
         public static final PIDConstants drivePIDConstants = new PIDConstants(
             0.4, 0, 0.01, 0, 0, 1, -1);
         public static final PIDConstants steerPIDConstants = new PIDConstants(
-            2, 0, 0.4, 0, 0, 1, -1);
+            7, 0, 0.1, 0, 0, 1, -1);
 
         // Module constants
         public static final Mk4iModuleConstants frontLeftModuleConstants = new Mk4iModuleConstants(
