@@ -1,14 +1,19 @@
 package frc.robot.subsystems.swerve;
 
 import static frc.robot.util.PhoenixUtil.*;
+
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
-// import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.revrobotics.RelativeEncoder;
@@ -23,7 +28,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-// import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.units.measure.Angle;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.Mk4iModuleConstants;
@@ -37,6 +43,7 @@ public class TalonSwerveModule extends SubsystemBase {
     // Steering motor (TalonFX with CANcoder)
     private final TalonFX steeringMotor;
     private final CANcoder steerAbsoluteEncoder;
+    private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
 
     // Configuration
     private final Mk4iModuleConstants moduleConstants;
@@ -44,6 +51,10 @@ public class TalonSwerveModule extends SubsystemBase {
     // State variables
     private SwerveModuleState currentState;
     private SwerveModuleState targetState;
+
+    // Inputs from turn motor
+    private final StatusSignal<Angle> turnAbsolutePosition;
+    private final StatusSignal<Angle> turnPosition;
 
     public TalonSwerveModule(Mk4iModuleConstants moduleConstants) {
         this.moduleConstants = moduleConstants;
@@ -57,8 +68,16 @@ public class TalonSwerveModule extends SubsystemBase {
         // Initialize steering hardware (TalonFX with CANcoder)
         steeringMotor = new TalonFX(moduleConstants.steeringMotorID(), "can_fd");
         steerAbsoluteEncoder = new CANcoder(moduleConstants.steerAbsoluteEncoderID(), "can_fd");
-        configureSteeringMotor();
         
+        configureSteeringMotor();
+        // Create turn status signals
+        turnAbsolutePosition = steerAbsoluteEncoder.getAbsolutePosition();
+        turnPosition = steeringMotor.getPosition();
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            50.0,
+            turnAbsolutePosition,
+            turnPosition);
+        ParentDevice.optimizeBusUtilizationForAll(steeringMotor);
         // Initialize states
         currentState = new SwerveModuleState(0, getSteerAngle());
         targetState = new SwerveModuleState(0, currentState.angle);
@@ -90,9 +109,14 @@ public class TalonSwerveModule extends SubsystemBase {
     private void configureSteeringMotor() {
         var turnConfig = new TalonFXConfiguration();
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        turnConfig.Slot0.kP = moduleConstants.steeringPIDConstants().kP();
-        turnConfig.Slot0.kI = moduleConstants.steeringPIDConstants().kI();
-        turnConfig.Slot0.kD = moduleConstants.steeringPIDConstants().kD();
+        turnConfig.Slot0 = new Slot0Configs()
+          .withKP(100)
+          .withKI(0)
+          .withKD(0.5)
+          .withKS(0.1)
+          .withKV(1.91)
+          .withKA(0)
+          .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
         turnConfig.Feedback.FeedbackRemoteSensorID = steerAbsoluteEncoder.getDeviceID();
         turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         turnConfig.Feedback.RotorToSensorRatio = Constants.SwerveConstants.Mk4iMechanicalConstants.steeringFactor;
@@ -114,6 +138,14 @@ public class TalonSwerveModule extends SubsystemBase {
         cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         // cc_cfg.MagnetSensor.MagnetOffset = 0.4;
         steerAbsoluteEncoder.getConfigurator().apply(cc_cfg);
+        
+    }
+
+    @SuppressWarnings("unused")
+    public void updateInputs(){
+        var turnStatus =
+            BaseStatusSignal.refreshAll(turnPosition);
+        var turnEncoderStatus = BaseStatusSignal.refreshAll(turnAbsolutePosition);
     }
 
     public void setDesiredState(SwerveModuleState desiredState) {
@@ -138,8 +170,7 @@ public class TalonSwerveModule extends SubsystemBase {
 
         // Set motor references
         drivingController.setReference(optimizedState.speedMetersPerSecond, ControlType.kVelocity);
-        final PositionVoltage anglePosition = new PositionVoltage(0);
-        steeringMotor.setControl(anglePosition.withPosition(optimizedState.angle.getRotations()));
+        steeringMotor.setControl(positionVoltageRequest.withPosition(optimizedState.angle.getRotations()));
     }
 
     private double getDriveVelocity() {
@@ -158,6 +189,7 @@ public class TalonSwerveModule extends SubsystemBase {
     }
 
     private void updateCurrentState() {
+        updateInputs();
         currentState = new SwerveModuleState(
             getDriveVelocity(),
             getSteerAngle()
@@ -177,12 +209,4 @@ public class TalonSwerveModule extends SubsystemBase {
     public SwerveModuleState getTargetState() {
         return targetState;
     }
-
-    
-
-    // @Override
-    // public void initSendable(SendableBuilder builder) {
-    //     builder.setSmartDashboardType("Talon Swerve Module");
-    //     System.out.println("FX Position: " + fx_pos.toString());
-    //     System.out.println("CANcoder Position: " + cc_pos.toString());
 }
