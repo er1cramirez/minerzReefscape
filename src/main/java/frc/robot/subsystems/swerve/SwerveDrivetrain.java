@@ -94,7 +94,7 @@ public class SwerveDrivetrain extends SubsystemBase{
      */
     public void setModuleStates(SwerveModuleState[] states) {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.maxSpeed);
-        for (int i = 0; i < swerveModules.length; i++) {
+        for (int i = 0; i < 1; i++) {// only for testing, then change to swerveModules.length
             swerveModules[i].setDesiredState(states[i]);
         }
     }
