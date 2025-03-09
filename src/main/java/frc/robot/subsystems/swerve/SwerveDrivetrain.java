@@ -106,9 +106,8 @@ public class SwerveDrivetrain extends SubsystemBase{
     // get Yaw from gyro
     public Rotation2d getRobotHeading(){
         // CCW is positive
-
         return Rotation2d.fromDegrees(
-            gyro.getFusedHeading()).plus(Rotation2d.fromRadians(Math.PI/2));
+            gyro.getAngle());
         // return new Rotation2d();
     }
 
@@ -175,17 +174,6 @@ public class SwerveDrivetrain extends SubsystemBase{
         // Set the swerve modules to lock mode(x pattern)
     }
 
-    // public void calibrateSteeringEncoders(){
-    //     // Calibrate the steering encoders
-    //     boolean allCalibrated = false;
-    //     for (int i = 0; i < swerveModules.length; i++) {
-    //         allCalibrated &= swerveModules[i].calibrateSteering();
-    //     }
-    //     if(allCalibrated){
-    //         System.out.println("steer encoder reset done");
-    //         // Logger.getInstance().recordOutput("Calibration/Steering", true);
-    //     }
-    // }
 
     public void testEachModule() {
         final double TEST_SPEED = 0.3;
