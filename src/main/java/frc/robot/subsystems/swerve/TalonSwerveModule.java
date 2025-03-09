@@ -89,7 +89,7 @@ public class TalonSwerveModule extends SubsystemBase {
 
     private void configureSteeringMotor() {
         var turnConfig = new TalonFXConfiguration();
-        turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnConfig.Slot0.kP = moduleConstants.steeringPIDConstants().kP();
         turnConfig.Slot0.kI = moduleConstants.steeringPIDConstants().kI();
         turnConfig.Slot0.kD = moduleConstants.steeringPIDConstants().kD();
@@ -107,9 +107,10 @@ public class TalonSwerveModule extends SubsystemBase {
                 InvertedValue.Clockwise_Positive : 
                 InvertedValue.CounterClockwise_Positive;
         tryUntilOk(5, () -> steeringMotor.getConfigurator().apply(turnConfig, 0.25));
+        // steeringMotor.
         /* Configure CANcoder to zero the magnet appropriately */
         CANcoderConfiguration cc_cfg = new CANcoderConfiguration();
-        cc_cfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1.0;
+        cc_cfg.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
         cc_cfg.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         // cc_cfg.MagnetSensor.MagnetOffset = 0.4;
         steerAbsoluteEncoder.getConfigurator().apply(cc_cfg);

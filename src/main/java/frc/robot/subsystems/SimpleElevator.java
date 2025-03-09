@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -36,6 +37,8 @@ public class SimpleElevator extends SubsystemBase {
         motor.setInverted(false);
         motor.configVoltageCompSaturation(12.0);
         motor.enableVoltageCompensation(true);
+        // Set brake mode
+        motor.setNeutralMode(NeutralMode.Brake);
     }
 
     private boolean isSafeToMove(double speed) {
