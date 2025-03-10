@@ -30,6 +30,7 @@ public class CoralGrabberArm extends SubsystemBase {
     
     // Predefined positions (in rotations)
     public static final Rotation2d STOWED_POSITION = Rotation2d.fromDegrees(0);
+    public static final Rotation2d MID_POSITION = Rotation2d.fromDegrees(45); // New mid position
     public static final Rotation2d SCORING_POSITION = Rotation2d.fromDegrees(90);
     
     public CoralGrabberArm() {

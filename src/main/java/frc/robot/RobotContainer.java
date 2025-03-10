@@ -22,6 +22,7 @@ import frc.robot.subsystems.swerve.SwerveDrivetrain;
 import frc.robot.telemetry.RobotTelemetry;
 // import frc.robot.util.ElevatorStates;
 import frc.robot.util.DriveMode;
+import frc.robot.commands.ArmPositionCommand;
 
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
@@ -78,12 +79,16 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> swerve.setDriveMode(DriveMode.PRECISION)))
         .onFalse(new InstantCommand(() -> swerve.setDriveMode(DriveMode.NORMAL)));
 
-    // Coral Arm position control
+    // Coral Arm position control using the new command
     new JoystickButton(mechanismController, XboxController.Button.kA.value)
-        .onTrue(new InstantCommand(() -> coralArm.setArmPosition(CoralGrabberArm.STOWED_POSITION)));
+        .onTrue(new ArmPositionCommand(coralArm, CoralGrabberArm.STOWED_POSITION));
 
     new JoystickButton(mechanismController, XboxController.Button.kB.value)
-        .onTrue(new InstantCommand(() -> coralArm.setArmPosition(CoralGrabberArm.SCORING_POSITION)));
+        .onTrue(new ArmPositionCommand(coralArm, CoralGrabberArm.SCORING_POSITION));
+
+    // Add a mid position if desired
+    new JoystickButton(mechanismController, XboxController.Button.kX.value)
+        .onTrue(new ArmPositionCommand(coralArm, CoralGrabberArm.MID_POSITION));
 
   }
 
