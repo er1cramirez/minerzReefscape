@@ -28,7 +28,7 @@ public class CoralGrabberArm extends SubsystemBase {
     
     // Predefined positions (in rotations)
     public static final double STOWED_POSITION = 0.0;
-    public static final double SCORING_POSITION = Math.PI / 4.0;
+    public static final double SCORING_POSITION = Math.PI / 2.0;
     
     public CoralGrabberArm() {
         // Use proper motor ID from CoralConstants
@@ -52,13 +52,14 @@ public class CoralGrabberArm extends SubsystemBase {
         config.absoluteEncoder.velocityConversionFactor(factor / 60.0);
         
         config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
-        config.closedLoop.p(0.4);
-        config.closedLoop.i(0.0);
+        config.closedLoop.p(0.015);
+        config.closedLoop.i(0.005);
         config.closedLoop.d(0.01);
         config.closedLoop.minOutput(-1);
         config.closedLoop.maxOutput(1);
-        config.closedLoop.positionWrappingEnabled(false);
-        
+        config.closedLoop.positionWrappingEnabled(true);
+        config.closedLoop.positionWrappingInputRange(-Math.PI,Math.PI);
+    
         armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 

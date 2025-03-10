@@ -110,11 +110,11 @@ public class TalonSwerveModule extends SubsystemBase {
         var turnConfig = new TalonFXConfiguration();
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnConfig.Slot0 = new Slot0Configs()
-          .withKP(100)
+          .withKP(0)
           .withKI(0)
-          .withKD(0.5)
-          .withKS(0.1)
-          .withKV(1.91)
+          .withKD(0.0)
+          .withKS(0.0)
+          .withKV(0.0)
           .withKA(0)
           .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
         turnConfig.Feedback.FeedbackRemoteSensorID = steerAbsoluteEncoder.getDeviceID();
