@@ -11,6 +11,8 @@ import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -27,8 +29,8 @@ public class CoralGrabberArm extends SubsystemBase {
     private final double gearRatio = 1.0;
     
     // Predefined positions (in rotations)
-    public static final double STOWED_POSITION = 0.0;
-    public static final double SCORING_POSITION = Math.PI / 2.0;
+    public static final Rotation2d STOWED_POSITION = Rotation2d.fromDegrees(0);
+    public static final Rotation2d SCORING_POSITION = Rotation2d.fromDegrees(90);
     
     public CoralGrabberArm() {
         // Use proper motor ID from CoralConstants
@@ -41,30 +43,44 @@ public class CoralGrabberArm extends SubsystemBase {
     }
     
     private void configureMotor() {
-        SparkMaxConfig config = new SparkMaxConfig();
-        config.inverted(true);
-        config.smartCurrentLimit(30); // Set appropriate current limit
-        config.voltageCompensation(12.0);
-        config.idleMode(IdleMode.kBrake);
-
         double factor = (2.0 * Math.PI) / gearRatio;
-        config.absoluteEncoder.positionConversionFactor(factor);
-        config.absoluteEncoder.velocityConversionFactor(factor / 60.0);
-        
-        config.closedLoop.feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
-        config.closedLoop.p(0.015);
-        config.closedLoop.i(0.005);
-        config.closedLoop.d(0.01);
-        config.closedLoop.minOutput(-1);
-        config.closedLoop.maxOutput(1);
-        config.closedLoop.positionWrappingEnabled(true);
-        config.closedLoop.positionWrappingInputRange(-Math.PI,Math.PI);
+
+        var turnConfig = new SparkMaxConfig();
+        turnConfig
+            .inverted(true)
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(20)
+            .voltageCompensation(12.0);
+        turnConfig
+            .absoluteEncoder
+            .inverted(false)
+            .positionConversionFactor(factor)
+            .velocityConversionFactor(factor / 60.0)
+            .averageDepth(2);
+        turnConfig
+            .closedLoop
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .positionWrappingEnabled(true)
+            .positionWrappingInputRange(0, 2 * Math.PI)
+            .pidf(1, 0.0, 0, 0.0);
+        turnConfig
+            .signals
+            .absoluteEncoderPositionAlwaysOn(true)
+            .absoluteEncoderPositionPeriodMs((int) (1000.0 / 100))
+            .absoluteEncoderVelocityAlwaysOn(true)
+            .absoluteEncoderVelocityPeriodMs(20)
+            .appliedOutputPeriodMs(20)
+            .busVoltagePeriodMs(20)
+            .outputCurrentPeriodMs(20);
     
-        armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        armMotor.configure(turnConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public void setArmPosition(double position) {
-        controller.setReference(position, ControlType.kPosition);
+    public void setArmPosition(Rotation2d rotation) {
+        double setpoint =
+            MathUtil.inputModulus(
+                rotation.plus(new Rotation2d()).getRadians(), 0, 2 * Math.PI);
+        controller.setReference(setpoint, ControlType.kPosition);
     }
 
     public double getArmPosition() {
