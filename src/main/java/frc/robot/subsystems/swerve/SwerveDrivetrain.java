@@ -25,7 +25,7 @@ import frc.robot.util.DriveMode;
 
 public class SwerveDrivetrain extends SubsystemBase{
     // Hardware
-    private final TalonSwerveModule[] swerveModules;
+    private final SwerveModule[] swerveModules;
     private final AHRS gyro;
     
     // Kinematics & Odometry
@@ -48,11 +48,11 @@ public class SwerveDrivetrain extends SubsystemBase{
      */
     public SwerveDrivetrain(){
         // Initialize hardware
-        swerveModules = new TalonSwerveModule[] {
-            new TalonSwerveModule(Constants.SwerveConstants.frontLeftModuleConstants),
-            new TalonSwerveModule(Constants.SwerveConstants.frontRightModuleConstants),
-            new TalonSwerveModule(Constants.SwerveConstants.backLeftModuleConstants),
-            new TalonSwerveModule(Constants.SwerveConstants.backRightModuleConstants)
+        swerveModules = new SwerveModule[] {
+            new SwerveModule(Constants.SwerveConstants.frontLeftModuleConstants),
+            new SwerveModule(Constants.SwerveConstants.frontRightModuleConstants),
+            new SwerveModule(Constants.SwerveConstants.backLeftModuleConstants),
+            new SwerveModule(Constants.SwerveConstants.backRightModuleConstants)
         };
         gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
         
@@ -94,7 +94,7 @@ public class SwerveDrivetrain extends SubsystemBase{
      */
     public void setModuleStates(SwerveModuleState[] states) {
         SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.maxSpeed);
-        for (int i = 0; i < 1; i++) {// only for testing, then change to swerveModules.length
+        for (int i = 0; i < swerveModules.length; i++) {
             swerveModules[i].setDesiredState(states[i]);
         }
     }
