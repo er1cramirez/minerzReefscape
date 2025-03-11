@@ -58,10 +58,12 @@ public class RobotContainer {
   private final Command autoRedLeft;
   private final Command autoRedRight;
   // private final Command simpleTimedAuto;
+  private final CoralGrabberArm m_coralArm = new CoralGrabberArm();
+
   public RobotContainer() {
     configureCommands();
     configureBindings();
-    configureSmartDashboard();
+    configureButtonBindings();
 
     // Camera
     CameraServer.startAutomaticCapture();
@@ -151,23 +153,12 @@ public class RobotContainer {
         .onFalse(new InstantCommand(() -> swerve.setDriveMode(DriveMode.NORMAL)));
   }
 
-  private void configureSmartDashboard() {
-    // Test buttons for CoralGrabberArm
-  //   SmartDashboard.putData("Coral/Test Forward", 
-  //       Commands.runOnce(() -> coralArm.setDirectOutput(0.5))
-  //              .andThen(Commands.waitSeconds(2))
-  //              .andThen(() -> coralArm.setDirectOutput(0)));
-
-  //   SmartDashboard.putData("Coral/Test Backward", 
-  //       Commands.runOnce(() -> coralArm.setDirectOutput(-0.5))
-  //              .andThen(Commands.waitSeconds(2))
-  //              .andThen(() -> coralArm.setDirectOutput(0)));
-
-  //   SmartDashboard.putData("Coral/Go To 45deg", 
-  //       Commands.runOnce(() -> coralArm.goToTestPosition(10)));
-
-  //   SmartDashboard.putData("Coral/Go To 0deg", 
-  //       Commands.runOnce(() -> coralArm.goToTestPosition(0)));
+  private void configureButtonBindings() {
+    new JoystickButton(mechanismController, XboxController.Button.kA.value)
+        .onTrue(m_coralArm.stowCommand());
+        
+    new JoystickButton(mechanismController, XboxController.Button.kB.value)
+        .onTrue(m_coralArm.scoreCommand());
   }
 
   public Command getAutonomousCommand() {
