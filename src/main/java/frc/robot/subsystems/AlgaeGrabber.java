@@ -13,7 +13,7 @@ public class AlgaeGrabber extends SubsystemBase {
     private final VictorSPX grabberMotor;
     
     // Constants
-    private static final double GRAB_SPEED = 0.15;
+    private static final double GRAB_SPEED = 0.3;
     private static final double RELEASE_SPEED = -1;
     
     public AlgaeGrabber() {
