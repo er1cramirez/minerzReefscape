@@ -54,7 +54,9 @@ public class CoralGrabberArm extends SubsystemBase {
         controller = armMotor.getClosedLoopController();
         
         constraints = new TrapezoidProfile.Constraints(MAX_VELOCITY, MAX_ACCELERATION);
-        profiledController = new ProfiledPIDController(5.0, 0.0, 0.5, constraints);
+        
+        // Configure the ProfiledPIDController for high-level position control
+        profiledController = new ProfiledPIDController(1.5, 0.0, 0.1, constraints);
         profiledController.setTolerance(Math.toRadians(2), 0.05);
         
         configureMotor();
@@ -63,47 +65,38 @@ public class CoralGrabberArm extends SubsystemBase {
     }
 
     private void configureMotor() {
-        // Same motor configuration as before
         SparkMaxConfig config = new SparkMaxConfig();
+        // Motor configuration
         config.inverted(true);
         config.smartCurrentLimit(20);
         config.voltageCompensation(12.0);
         config.idleMode(IdleMode.kBrake);
 
-        // Configure relative encoder
-        config.encoder.positionConversionFactor(1.0 / GEAR_RATIO);
-        config.encoder.velocityConversionFactor(1.0 / (GEAR_RATIO * 60.0));
+        // Configure relative encoder for velocity control
+        config.encoder.positionConversionFactor((2.0 * Math.PI) / GEAR_RATIO);
+        config.encoder.velocityConversionFactor((2.0 * Math.PI) / (GEAR_RATIO * 60.0));
 
-        // Configure absolute encoder
+        // Configure absolute encoder for position feedback
         config.absoluteEncoder.positionConversionFactor(2.0 * Math.PI);
         config.absoluteEncoder.velocityConversionFactor((2.0 * Math.PI) / 60.0);
         config.absoluteEncoder.averageDepth(2);
         
-        // Configure closed loop for velocity control
+        // Configure SparkMax PID for velocity control only
         config.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(0.1)
-            .i(0.0)
-            .d(0.05)
-            .velocityFF(0.2)
+            .p(0.1)     // Velocity control P
+            .i(0.0)     // I term
+            .d(0.0)     // D term for velocity
+            .velocityFF(0.2)  // Feed-forward gain for velocity
             .outputRange(-1, 1);
 
-        armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        armMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
-        // Initialize position based on absolute encoder
+        // Sync encoder positions
         double absPosition = absEncoder.getPosition();
         encoder.setPosition(absPosition);
     }
 
-    /**
-     * Set arm position using the onboard PID controller
-     */
-    public void setPositionDirectPID(double position) {
-        isProfileControlActive = false;
-        targetPosition = position;
-        controller.setReference(position, ControlType.kPosition);
-    }
-    
     /**
      * Creates a command that moves the arm to a target position using profiled PID
      */
@@ -119,11 +112,12 @@ public class CoralGrabberArm extends SubsystemBase {
             
             // Continue execution until at setpoint
             Commands.run(this::executeProfiledControl, this)
-                .until(profiledController::atGoal),
+                .until(() -> profiledController.atGoal()),
             
-            // Finalize with direct position control
+            // Finalize by maintaining the velocity at zero
             Commands.runOnce(() -> {
-                setPositionDirectPID(position);
+                controller.setReference(0, ControlType.kVelocity);
+                isProfileControlActive = false;
             })
         ).withName("MoveArmTo" + position);
     }
@@ -144,17 +138,17 @@ public class CoralGrabberArm extends SubsystemBase {
     
     /**
      * Execute one cycle of the profiled PID control
+     * This is called by the command during profiled movement
      */
     private void executeProfiledControl() {
         // Get current actual position from absolute encoder
         double currentPosition = absEncoder.getPosition();
-        // double velocity = absEncoder.getVelocity();
         
-        // Calculate next velocity using the profiled PID controller
-        double output = profiledController.calculate(currentPosition);
+        // Calculate desired velocity using the profiled PID controller
+        double velocityOutput = profiledController.calculate(currentPosition);
         
-        // Use velocity control mode with the calculated output
-        controller.setReference(output, ControlType.kVelocity);
+        // Send velocity command to SparkMax
+        controller.setReference(velocityOutput, ControlType.kVelocity);
     }
 
     /**
@@ -166,22 +160,31 @@ public class CoralGrabberArm extends SubsystemBase {
             isProfileControlActive = false;
             armMotor.set(speed);
             wasMoving = true;
+        } else if (wasMoving) {
+            // When joystick is released, hold position using profiled control
+            targetPosition = absEncoder.getPosition();
+            profiledController.reset(targetPosition, absEncoder.getVelocity());
+            profiledController.setGoal(targetPosition);
+            isProfileControlActive = true;
+            wasMoving = false;
+        } else if (isProfileControlActive) {
+            // Continue using profiled control
+            executeProfiledControl();
         } else {
-            if (wasMoving) {
-                // Capture position when input stops
-                targetPosition = absEncoder.getPosition();
-                setPositionDirectPID(targetPosition);
-                wasMoving = false;
-            }
+            // Maintain zero velocity
+            controller.setReference(0, ControlType.kVelocity);
         }
     }
     
     /**
-     * Stop the arm and hold position
+     * Stop the arm and hold current position
      */
     public void stop() {
         targetPosition = absEncoder.getPosition();
-        setPositionDirectPID(targetPosition);
+        profiledController.reset(targetPosition, absEncoder.getVelocity());
+        profiledController.setGoal(targetPosition);
+        isProfileControlActive = true;
+        wasMoving = false;
     }
 
     /**
@@ -193,7 +196,6 @@ public class CoralGrabberArm extends SubsystemBase {
     
     @Override
     public void periodic() {
-        // Simplified periodic - just update telemetry
     }
     
     @Override
