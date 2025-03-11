@@ -10,6 +10,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 // import com.revrobotics.spark.config.MAXMotionConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,7 +47,7 @@ public class CoralGrabberArm extends SubsystemBase {
     private void configureMotor() {
         SparkMaxConfig config = new SparkMaxConfig();
         config.inverted(true);
-        config.smartCurrentLimit(40);
+        config.smartCurrentLimit(20);
         config.voltageCompensation(12.0);
         config.idleMode(IdleMode.kBrake);
 
@@ -57,6 +58,7 @@ public class CoralGrabberArm extends SubsystemBase {
 
         // PID without position wrapping
         config.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(0.7)
             .i(0.0)
             .d(0.3)
