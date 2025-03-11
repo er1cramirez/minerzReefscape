@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -21,6 +22,7 @@ public class CoralGrabberArm extends SubsystemBase {
     // Hardware
     private final SparkMax armMotor;
     private final RelativeEncoder encoder;
+    private final AbsoluteEncoder absEncoder;
     private final SparkClosedLoopController controller;
 
     // Position tracking
@@ -35,6 +37,7 @@ public class CoralGrabberArm extends SubsystemBase {
     public CoralGrabberArm() {
         armMotor = new SparkMax(SimpleElevatorConstants.MOTOR_ID, MotorType.kBrushless);
         encoder = armMotor.getEncoder();
+        absEncoder = armMotor.getAbsoluteEncoder();
         controller = armMotor.getClosedLoopController();
         
         configureMotor();

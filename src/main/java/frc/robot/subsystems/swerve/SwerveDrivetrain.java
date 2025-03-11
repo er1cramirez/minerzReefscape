@@ -3,6 +3,8 @@ package frc.robot.subsystems.swerve;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.studica.frc.AHRS;
+
 // import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,7 +28,7 @@ import frc.robot.util.DriveMode;
 public class SwerveDrivetrain extends SubsystemBase{
     // Hardware
     private final SwerveModule[] swerveModules;
-    //private final AHRS gyro;
+    private final AHRS gyro;
     
     // Kinematics & Odometry
     private final SwerveDriveKinematics kinematics;
@@ -54,9 +56,7 @@ public class SwerveDrivetrain extends SubsystemBase{
             new SwerveModule(Constants.SwerveConstants.backLeftModuleConstants),
             new SwerveModule(Constants.SwerveConstants.backRightModuleConstants)
         };
-        //gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
-        //while (gyro.isCalibrating());
-        // gyro.
+        gyro = new AHRS(/*USB */AHRS.NavXComType.kMXP_SPI);
         // Initialize kinematics and odometry
         kinematics = Constants.SwerveConstants.kinematics;
         resetRobotHeading();
@@ -107,20 +107,13 @@ public class SwerveDrivetrain extends SubsystemBase{
     // get Yaw from gyro
     public Rotation2d getRobotHeading(){
         // CCW is positive
-        // return Rotation2d.fromDegrees(
-        //     gyro.getYaw());
-        // return Rotation2d.fromDegrees(
-        //     gyro.getFusedHeading()).plus(Rotation2d.fromRadians(Math.PI/2));
-        return new Rotation2d();
-        // gyro.get
-        //return gyro.getRotation2d();
-        //return Rotation2d.fromDegrees(gyro.getYaw());
+        return Rotation2d.fromDegrees(
+            gyro.getAngle());
     }
 
     // Reset the robot heading(yaw)
     public void resetRobotHeading(){
-        //gyro.zeroYaw();
-        //gyro.reset();
+        gyro.reset();
     } 
 
     
