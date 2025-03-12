@@ -154,9 +154,13 @@ public class RobotContainer {
         .onTrue(new InstantCommand(
             () -> elevator.hold()
         ));
+        
+        new JoystickButton(mechanismController, XboxController.Button.kX.value)
+        .onTrue(new InstantCommand(
+          () -> elevator.releaseHold()
+          ));
   }
-
-
+  
   public Command getAutonomousCommand() {
     return telemetry.getSelectedAuto();
   }
