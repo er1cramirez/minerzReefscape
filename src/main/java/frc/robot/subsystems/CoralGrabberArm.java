@@ -49,7 +49,7 @@ public class CoralGrabberArm extends SubsystemBase {
     private boolean isProfileControlActive = false;
     
     // Homing constants
-    private static final double HOMING_SPEED = -0.2; // Slow speed for finding limit switch
+    private static final double HOMING_SPEED = -0.08; // Slow speed for finding limit switch
     private static final double DEBOUNCE_TIME = 0.1; // 100ms debounce for limit switch
     
     // Pre-defined positions (can be moved to Constants)
