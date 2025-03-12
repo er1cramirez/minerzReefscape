@@ -146,7 +146,7 @@ public class CoralGrabberArm extends SubsystemBase {
      * Checks if the limit switch is currently triggered (with debounce)
      */
     private boolean getDebouncedLimitSwitch() {
-        return limitSwitchDebouncer.calculate(limitSwitch.get());
+        return limitSwitchDebouncer.calculate(!limitSwitch.get());
     }
     
     /**
