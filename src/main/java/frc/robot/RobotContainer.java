@@ -61,7 +61,6 @@ public class RobotContainer {
   public RobotContainer() {
     configureCommands();
     configureBindings();
-    configureSmartDashboard();
 
     // Camera
     CameraServer.startAutomaticCapture();
@@ -149,26 +148,14 @@ public class RobotContainer {
     new JoystickButton(chassisController, XboxController.Button.kRightBumper.value)
         .onTrue(new InstantCommand(() -> swerve.setDriveMode(DriveMode.PRECISION)))
         .onFalse(new InstantCommand(() -> swerve.setDriveMode(DriveMode.NORMAL)));
+
+    // Elevator hold
+    new JoystickButton(mechanismController, XboxController.Button.kY.value)
+        .onTrue(new InstantCommand(
+            () -> elevator.hold()
+        ));
   }
 
-  private void configureSmartDashboard() {
-    // Test buttons for CoralGrabberArm
-  //   SmartDashboard.putData("Coral/Test Forward", 
-  //       Commands.runOnce(() -> coralArm.setDirectOutput(0.5))
-  //              .andThen(Commands.waitSeconds(2))
-  //              .andThen(() -> coralArm.setDirectOutput(0)));
-
-  //   SmartDashboard.putData("Coral/Test Backward", 
-  //       Commands.runOnce(() -> coralArm.setDirectOutput(-0.5))
-  //              .andThen(Commands.waitSeconds(2))
-  //              .andThen(() -> coralArm.setDirectOutput(0)));
-
-  //   SmartDashboard.putData("Coral/Go To 45deg", 
-  //       Commands.runOnce(() -> coralArm.goToTestPosition(10)));
-
-  //   SmartDashboard.putData("Coral/Go To 0deg", 
-  //       Commands.runOnce(() -> coralArm.goToTestPosition(0)));
-  }
 
   public Command getAutonomousCommand() {
     return telemetry.getSelectedAuto();

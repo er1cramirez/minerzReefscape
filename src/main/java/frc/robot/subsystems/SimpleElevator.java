@@ -44,6 +44,10 @@ public class SimpleElevator extends SubsystemBase {
         motor.set(ControlMode.PercentOutput, 0);
     }
 
+    public void hold() {
+        motor.set(ControlMode.PercentOutput, 0.05);
+    }
+
     @Override
     public void periodic() {
     }
