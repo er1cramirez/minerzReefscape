@@ -6,14 +6,11 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CoralConstants;
+import frc.robot.Constants.SimpleElevatorConstants;
 
 public class SimpleElevator extends SubsystemBase {
     // Hardware
     private final VictorSPX motor;
-    
-    // Estado para el modo de retención
-    private boolean holdMode = false;
-    private static final double HOLD_POWER = 0.05;
 
     public SimpleElevator() {
         // Initialize motor
@@ -30,54 +27,36 @@ public class SimpleElevator extends SubsystemBase {
         motor.setNeutralMode(com.ctre.phoenix.motorcontrol.NeutralMode.Brake);
     }
 
-    private boolean isSafeToMove(double speed) {
-        return true;
+    public void setSpeed(double speed) {
+        // Si los triggers no están siendo presionados (con cierto umbral) se mantiene la posición
+        if (Math.abs(speed) < SimpleElevatorConstants.INPUT_THRESHOLD) 
+            hold();
+        else 
+            motor.set(ControlMode.PercentOutput, speed);
     }
 
-    public void setSpeed(double speed) {
-        // Si estamos en modo hold, ignoramos los comandos de velocidad
-        if (holdMode) {
-            return;
-        }
-        
-        if (isSafeToMove(speed)) {
-            motor.set(ControlMode.PercentOutput, speed);
-        } else {
-            stop();
-        }
+    // Aplica un poco de potencia para mantener la posición
+    private void hold() {
+        motor.set(ControlMode.PercentOutput, SimpleElevatorConstants.HOLD_POWER);
     }
 
     public void stop() {
-        if (!holdMode) {
-            motor.set(ControlMode.PercentOutput, 0);
-        }
+        hold();
     }
 
-    public void hold() {
-        holdMode = true;
-        motor.set(ControlMode.PercentOutput, HOLD_POWER);
-        System.out.println("Elevator hold activated");
-    }
-    
-    public void releaseHold() {
-        holdMode = false;
-        stop();
-        System.out.println("Elevator hold released");
-    }
-
-    public boolean isHolding() {
-        return holdMode;
+    public void totalStop() {
+        motor.set(ControlMode.PercentOutput, 0);
     }
 
     @Override
     public void periodic() {
-        // Puede añadir telemetría aquí si desea monitorear el estado
+        // Puede añadir telemetría aquí si lo desea
     }
 
     @Override
     public void initSendable(SendableBuilder builder) {
         // builder.setSmartDashboardType("SimpleElevator");
-        // builder.addBooleanProperty("Hold Mode", this::isHolding, null);
         // builder.addDoubleProperty("Motor Output", () -> motor.getMotorOutputPercent(), null);
+        // builder.addBooleanProperty("Is Holding", () -> Math.abs(motor.getMotorOutputPercent() - HOLD_POWER) < 0.01, null);
     }
 }

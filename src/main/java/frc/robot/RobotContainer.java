@@ -148,17 +148,6 @@ public class RobotContainer {
     new JoystickButton(chassisController, XboxController.Button.kRightBumper.value)
         .onTrue(new InstantCommand(() -> swerve.setDriveMode(DriveMode.PRECISION)))
         .onFalse(new InstantCommand(() -> swerve.setDriveMode(DriveMode.NORMAL)));
-
-    // Elevator hold
-    new JoystickButton(mechanismController, XboxController.Button.kY.value)
-        .onTrue(new InstantCommand(
-            () -> elevator.hold()
-        ));
-        
-        new JoystickButton(mechanismController, XboxController.Button.kX.value)
-        .onTrue(new InstantCommand(
-          () -> elevator.releaseHold()
-          ));
   }
   
   public Command getAutonomousCommand() {
