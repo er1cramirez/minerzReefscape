@@ -49,8 +49,6 @@ public class AutoRedRight extends SequentialCommandGroup {
         );
     }
 
-
-
     private Trajectory createTrajectory(SwerveDrivetrain swerve, Pose2d start, Pose2d end) {
         TrajectoryConfig config = new TrajectoryConfig(
             AutoConstants.MAX_SPEED,
