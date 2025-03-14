@@ -28,8 +28,20 @@ public class SimpleElevator extends SubsystemBase {
     }
 
     public void setSpeed(double speed) {
+        // Fisicamente no es factible
+        // if (speed > SimpleElevatorConstants.INPUT_THRESHOLD) {
+        //     if(limitSwitch.get())
+        //         motor.set(ControlMode.PercentOutput, speed);
+        //     else
+        //         hold();
+        // } else if (Math.abs(speed) > SimpleElevatorConstants.INPUT_THRESHOLD) {
+        //     motor.set(ControlMode.PercentOutput, speed);
+        // } else {
+        //     hold();
+        // }
+
         // Si los triggers no están siendo presionados (con cierto umbral) se mantiene la posición
-        if (Math.abs(speed) < SimpleElevatorConstants.INPUT_THRESHOLD) 
+        if (Math.abs(speed) < SimpleElevatorConstants.INPUT_THRESHOLD)
             hold();
         else 
             motor.set(ControlMode.PercentOutput, speed);
