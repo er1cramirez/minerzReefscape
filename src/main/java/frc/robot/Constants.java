@@ -176,8 +176,8 @@ public class Constants {
     }
 
     public static final class AlgaeConstants {
-        public static final int GRABBER_MOTOR_ID = 14; // Update this ID as needed
-        public static final int ARM_MOTOR_ID = 13;
+        public static final int GRABBER_MOTOR_ID = 13; // Update this ID as needed
+        public static final int ARM_MOTOR_ID = 14;
         public static final double SLEW_RATE = 4.0;
         public static final double MAX_SPEED = 1.0;
     }

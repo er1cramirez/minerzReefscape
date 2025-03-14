@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopAlgaeArm;
-import frc.robot.commands.TeleopAlgaeGrabber;
+// import frc.robot.commands.TeleopAlgaeGrabber;
 import frc.robot.commands.TeleopClimber;
 import frc.robot.commands.TeleopCoralArm;
 import frc.robot.commands.TeleopDrive;
@@ -24,7 +24,7 @@ import frc.robot.commands.auto.AutoRedLeft;
 import frc.robot.commands.auto.AutoRedRight;
 // import frc.robot.commands.auto.TimedAutoExample;
 import frc.robot.commands.TeleopCoralGrabber;
-import frc.robot.subsystems.AlgaeGrabber;
+// import frc.robot.subsystems.AlgaeGrabber;
 import frc.robot.subsystems.AlgaeGrabberArm;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CoralGrabber;
@@ -41,7 +41,7 @@ public class RobotContainer {
   private final SwerveDrivetrain swerve = new SwerveDrivetrain();
   private final SimpleElevator elevator = new SimpleElevator();
   private final CoralGrabber coralGrabber = new CoralGrabber();
-  private final AlgaeGrabber algaeGrabber = new AlgaeGrabber();
+  // private final AlgaeGrabber algaeGrabber = new AlgaeGrabber();
   private final CoralGrabberArm coralArm = new CoralGrabberArm();
   private final AlgaeGrabberArm algaeArm = new AlgaeGrabberArm();
   private final Climber climber = new Climber();
@@ -124,11 +124,11 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> ledStripe.setState(LedState.SCORING)))
         .onFalse(new InstantCommand(() -> ledStripe.setState(LedState.ENABLED)));
     // Algae Grabber controls
-    new JoystickButton(mechanismController, XboxController.Button.kA.value)
-        .whileTrue(new TeleopAlgaeGrabber(algaeGrabber, true));  // Grab while held
+    // new JoystickButton(mechanismController, XboxController.Button.kA.value)
+    //     .whileTrue(new TeleopAlgaeGrabber(algaeGrabber, true));  // Grab while held
 
-    new JoystickButton(mechanismController, XboxController.Button.kB.value)
-        .whileTrue(new TeleopAlgaeGrabber(algaeGrabber, false));  // Release while held
+    // new JoystickButton(mechanismController, XboxController.Button.kB.value)
+    //     .whileTrue(new TeleopAlgaeGrabber(algaeGrabber, false));  // Release while held
 
     // Field relative drive
     new JoystickButton(chassisController, XboxController.Button.kB.value)
