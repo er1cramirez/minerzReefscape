@@ -32,11 +32,11 @@ public class AlgaeGrabber extends SubsystemBase {
     }
     
     public void grab() {
-        grabberMotor.set(ControlMode.PercentOutput, GRAB_SPEED);
+        grabberMotor.set(ControlMode.PercentOutput, GRAB_SPEED*0.15);
     }
     
     public void release() {
-        grabberMotor.set(ControlMode.PercentOutput, RELEASE_SPEED);
+        grabberMotor.set(ControlMode.PercentOutput, RELEASE_SPEED*0.15);
     }
     
     public void stop() {

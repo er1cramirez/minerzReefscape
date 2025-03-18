@@ -18,13 +18,15 @@ import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
 public class AutoRedLeft extends SequentialCommandGroup {
 
+    
     private final Pose2d startPose = new Pose2d(0, 0, new Rotation2d());
-    private final Pose2d goalPose = new Pose2d(2.,1.5, new Rotation2d());
+    private final Pose2d goalPose = new Pose2d(2.85,-1.35, new Rotation2d());
 
     // Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
     public AutoRedLeft(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber) {
         Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);  
-
+        // Trajectory trajectory2 = createTrajectory(swerve, goalPose, goalPose);
+        
         addCommands(
             new InstantCommand(() -> swerve.resetRobotHeading()),
             Commands.startEnd(
@@ -43,7 +45,8 @@ public class AutoRedLeft extends SequentialCommandGroup {
                 "Test Auto",
                 swerve,
                 trajectory,
-                new Rotation2d()
+                Rotation2d.fromDegrees(10)
+                // new Rotation2d()
             ),
             Commands.waitSeconds(2)
         );
