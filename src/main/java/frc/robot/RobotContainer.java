@@ -19,6 +19,7 @@ import frc.robot.commands.TeleopCoralArm;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.TeleopSimpleElevator;
 import frc.robot.commands.auto.AutoCenter;
+import frc.robot.commands.auto.AutoCustom;
 import frc.robot.commands.auto.AutoLeave;
 import frc.robot.commands.auto.AutoRedLeft;
 import frc.robot.commands.auto.AutoRedRight;
@@ -57,6 +58,7 @@ public class RobotContainer {
   private final Command autoLeave;
   private final Command autoRedLeft;
   private final Command autoRedRight;
+  private final Command customAuto;
   // private final Command simpleTimedAuto;
   public RobotContainer() {
     configureCommands();
@@ -74,6 +76,8 @@ public class RobotContainer {
         swerve, coralArm, coralGrabber);
     autoRedRight = new AutoRedRight(
         swerve, coralArm, coralGrabber);
+    customAuto = new AutoCustom(
+      swerve, coralArm, coralGrabber, elevator);
     // complexCommand = new InstantCommand();
 
     // Configure telemetry
@@ -81,6 +85,7 @@ public class RobotContainer {
     telemetry.addAutoCommand("Auto Solo Sale", autoLeave);
     telemetry.addAutoCommand("Auto Izquierdo", autoRedLeft);
     telemetry.addAutoCommand("Auto Derecho", autoRedRight);
+    telemetry.addAutoCommand("Auto Personalizado", customAuto);
     telemetry.initDashboard();
   }
 
