@@ -20,14 +20,16 @@ public class AutoCustom extends SequentialCommandGroup {
     public AutoCustom(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber, SimpleElevator elevator) {
         // Define poses for trajectories
         Pose2d startPose = new Pose2d(0, 0, new Rotation2d());
-        Pose2d forwardPose = new Pose2d(1, 0, new Rotation2d());  // 1 meter forward
-        Pose2d diagonalPose = new Pose2d(0.5, -1, new Rotation2d()); // Diagonal back and right
-        Pose2d rightPose = new Pose2d(0.5, -2, new Rotation2d());  // More to the right
+        Pose2d forwardPose = new Pose2d(1.70, 0, new Rotation2d());  // 1 meter forward
+        Pose2d diagonalPose = new Pose2d(1.55, -0.185, new Rotation2d()); // Diagonal back and right
+        Pose2d rightPose = new Pose2d(1.35, -2, new Rotation2d()); 
+        Pose2d humanPose = new Pose2d(6, -2, new Rotation2d()); // More to the right
         
         // Create trajectories
         Trajectory forwardTrajectory = createTrajectory(swerve, startPose, forwardPose);
         Trajectory diagonalTrajectory = createTrajectory(swerve, forwardPose, diagonalPose);
         Trajectory rightTrajectory = createTrajectory(swerve, diagonalPose, rightPose);
+        Trajectory humanTrajectory = createTrajectory(swerve, rightPose, humanPose);
         
         addCommands(
             // 1. Reset heading, lift coral arm and absorb
@@ -36,13 +38,13 @@ public class AutoCustom extends SequentialCommandGroup {
                 () -> coralArm.setSpeed(0.15),
                 () -> coralArm.stop(),
                 coralArm
-            ).withTimeout(0.5),
+            ).withTimeout(0.15),
             
             Commands.startEnd(
                 () -> coralGrabber.grab(),
                 () -> coralGrabber.stop(),
                 coralGrabber
-            ).withTimeout(0.3),
+            ).withTimeout(0.2),
             
             // 2. Move forward
             new SwerveTrajectoryCommand(
@@ -51,24 +53,31 @@ public class AutoCustom extends SequentialCommandGroup {
                 forwardTrajectory,
                 new Rotation2d()
             ),
-            
+             // 3.5 Raise elevator to limit
+             Commands.startEnd(
+                () -> coralArm.setSpeed(0.2),  // Using high power to raise
+                () -> coralArm.setSpeed(0.2),  // Using high power to raise
+                // () -> coralArm.stop(),
+                coralArm
+            ).withTimeout(1.15),
+
             // 3. Raise elevator to limit
-            Commands.startEnd(
-                () -> elevator.setSpeed(0.8),  // Using high power to raise
-                () -> elevator.stop(),
-                elevator
-            ).withTimeout(2.0),
+            // Commands.startEnd(
+            //     () -> elevator.setSpeed(0.8),  // Using high power to raise
+            //     () -> elevator.stop(),
+            //     elevator
+            // ).withTimeout(1.4),
             
             // 4. Move diagonally (back and right)
-            new SwerveTrajectoryCommand(
-                "Move Diagonally",
-                swerve,
-                diagonalTrajectory,
-                new Rotation2d()
-            ),
+            // new SwerveTrajectoryCommand(
+            //     "Move Diagonally",
+            //     swerve,
+            //     diagonalTrajectory,
+            //     new Rotation2d()
+            // ),
             
             // 5. Wait 2 seconds
-            Commands.waitSeconds(2),
+            // Commands.waitSeconds(2),
             
             // 6. Release coral
             Commands.startEnd(
@@ -82,6 +91,12 @@ public class AutoCustom extends SequentialCommandGroup {
                 "Move Right",
                 swerve,
                 rightTrajectory,
+                new Rotation2d()
+            ),
+            new SwerveTrajectoryCommand(
+                "Move Human",
+                swerve,
+                humanTrajectory,
                 new Rotation2d()
             )
         );

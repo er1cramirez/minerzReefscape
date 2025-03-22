@@ -164,7 +164,7 @@ public class Constants {
         public static final int TOP_SWITCH_PORT = 1;
         public static final int CURRENT_LIMIT = 30;
         public static final double DEBOUNCE_TIME = 0.03; // 30ms debounce
-        public static final double HOLD_POWER = 0.05;
+        public static final double HOLD_POWER = 0.08;
         public static final double INPUT_THRESHOLD = 0.05;
     }
 

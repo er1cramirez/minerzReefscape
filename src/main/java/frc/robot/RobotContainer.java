@@ -99,7 +99,7 @@ public class RobotContainer {
     // Manual control
     coralArm.setDefaultCommand(new TeleopCoralArm(
       coralArm,
-      () -> -mechanismController.getRightY()
+      () -> -mechanismController.getRightY()*1.5
     ));
     // Algae Arm manual control
     algaeArm.setDefaultCommand(new TeleopAlgaeArm(

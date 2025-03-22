@@ -41,7 +41,8 @@ public class SwerveDrivetrain extends SubsystemBase{
     // State
     // private ChassisSpeeds currentSpeeds = new ChassisSpeeds();
     private boolean isFieldRelative = false;
-    private DriveMode driveMode = DriveMode.NORMAL;
+    // private DriveMode driveMode = DriveMode.NORMAL;
+    private DriveMode driveMode = DriveMode.TURBO;
 
     /**
      * Constructs a SwerveDrivetrain object.
