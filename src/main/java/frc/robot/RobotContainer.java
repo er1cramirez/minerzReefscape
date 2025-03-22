@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -64,7 +65,16 @@ public class RobotContainer {
     configureCommands();
     configureBindings();
 
-    // Camera
+    // Cameras
+    UsbCamera frontCamera = CameraServer.startAutomaticCapture("bot", 0);
+    frontCamera.setResolution(320, 240);
+    frontCamera.setFPS(15);
+
+    // Segunda cámara (trasera o donde la necesites)
+    UsbCamera secondCamera = CameraServer.startAutomaticCapture("top", 1);
+    secondCamera.setResolution(320, 240);
+    secondCamera.setFPS(15);
+
     CameraServer.startAutomaticCapture();
     SmartDashboard.putData(CommandScheduler.getInstance());
     // Auto Commands
