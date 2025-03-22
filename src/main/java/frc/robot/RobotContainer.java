@@ -71,7 +71,7 @@ public class RobotContainer {
     autoCenter = new AutoCenter(
         swerve, coralArm, coralGrabber);
     autoLeave = new AutoLeave(
-        swerve, coralArm, coralGrabber);
+        swerve, algaeArm);
     autoRedLeft = new AutoRedLeft(
         swerve, coralArm, coralGrabber);
     autoRedRight = new AutoRedRight(

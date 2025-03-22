@@ -11,8 +11,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.AutoConstants;
-import frc.robot.subsystems.CoralGrabber;
-import frc.robot.subsystems.CoralGrabberArm;
+import frc.robot.subsystems.AlgaeGrabberArm;
+// import frc.robot.subsystems.CoralGrabber;
+// import frc.robot.subsystems.CoralGrabberArm;
 //import frc.robot.subsystems.SimpleElevator;
 import frc.robot.subsystems.swerve.SwerveDrivetrain;
 
@@ -22,7 +23,7 @@ public class AutoLeave extends SequentialCommandGroup {
     private final Pose2d goalPose = new Pose2d(0.5,0, new Rotation2d());
 
     // Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
-    public AutoLeave(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber) {
+    public AutoLeave(SwerveDrivetrain swerve, AlgaeGrabberArm algaeArm) {
         Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);  
 
         addCommands(
@@ -35,10 +36,10 @@ public class AutoLeave extends SequentialCommandGroup {
             ),
             Commands.waitSeconds(2),
             Commands.startEnd(
-                () -> coralArm.setSpeed(2),
-                () -> coralArm.stop(),
-                coralArm
-            ).withTimeout(1)
+                () -> algaeArm.setSpeed(0.5),
+                () -> algaeArm.stop(),
+                algaeArm
+            ).withTimeout(0.3)
         );
     }
 
@@ -47,6 +48,8 @@ public class AutoLeave extends SequentialCommandGroup {
             AutoConstants.MAX_SPEED,
             AutoConstants.MAX_ACCELERATION
         ).setKinematics(swerve.getKinematics());
+
+        // config.setReversed(true);
         
         return TrajectoryGenerator.generateTrajectory(
             start,
