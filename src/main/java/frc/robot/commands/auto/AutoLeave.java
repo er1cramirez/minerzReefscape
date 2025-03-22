@@ -19,7 +19,7 @@ import frc.robot.subsystems.swerve.SwerveDrivetrain;
 public class AutoLeave extends SequentialCommandGroup {
 
     private final Pose2d startPose = new Pose2d(0, 0, new Rotation2d());
-    private final Pose2d goalPose = new Pose2d(1.8,0, new Rotation2d());
+    private final Pose2d goalPose = new Pose2d(0.5,0, new Rotation2d());
 
     // Trajectory trajectory = createTrajectory(swerve, startPose, goalPose);
     public AutoLeave(SwerveDrivetrain swerve, CoralGrabberArm coralArm, CoralGrabber coralGrabber) {
@@ -27,29 +27,20 @@ public class AutoLeave extends SequentialCommandGroup {
 
         addCommands(
             new InstantCommand(() -> swerve.resetRobotHeading()),
-            Commands.startEnd(
-                () -> coralArm.setSpeed(0.15),
-                () -> coralArm.stop(),
-                coralArm
-            ).withTimeout(0.5),
-            
-            Commands.startEnd(
-                () -> coralGrabber.grab(),
-                () -> coralGrabber.stop(),
-                coralGrabber
-            ).withTimeout(0.3),
-            // Commands.wait(1);
             new SwerveTrajectoryCommand(
                 "Test Auto",
                 swerve,
                 trajectory,
                 new Rotation2d()
             ),
-            Commands.waitSeconds(2)
+            Commands.waitSeconds(2),
+            Commands.startEnd(
+                () -> coralArm.setSpeed(2),
+                () -> coralArm.stop(),
+                coralArm
+            ).withTimeout(1)
         );
     }
-
-
 
     private Trajectory createTrajectory(SwerveDrivetrain swerve, Pose2d start, Pose2d end) {
         TrajectoryConfig config = new TrajectoryConfig(
@@ -64,6 +55,4 @@ public class AutoLeave extends SequentialCommandGroup {
             config
         );
     }
-    
-    
 }
